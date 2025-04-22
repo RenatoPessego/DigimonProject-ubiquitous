@@ -114,4 +114,11 @@ export const profileStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#003A49',
   },
+  cardGrid: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  gap: 12,
+},
+
 });

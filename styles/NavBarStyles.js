@@ -59,4 +59,24 @@ export const NavBarStyles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  profileOverlay: {
+    flex: 1,
+    alignItems: 'flex-end',
+    paddingTop: 60,
+    paddingRight: 15,
+    backgroundColor: '#00000044',
+  },
+  profileMenu: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 10,
+    width: 150,
+    elevation: 5,
+  },
+  profileItem: {
+    fontSize: 16,
+    paddingVertical: 8,
+    fontWeight: '600',
+    color: '#333',
+  }
 });
