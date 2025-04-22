@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../config';
-import { homeStyles } from '../styles/homeStyles';
 import NavBar from '../components/NavBar';
 
 export default function HomePage() {
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
@@ -18,9 +25,7 @@ export default function HomePage() {
       }
 
       const response = await fetch(`${API_URL}/auth/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await response.json();
@@ -43,7 +48,14 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <View style={homeStyles.loading}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#E0F7FA',
+        }}
+      >
         <ActivityIndicator size="large" color="#2894B0" />
       </View>
     );
@@ -51,20 +63,53 @@ export default function HomePage() {
 
   if (!user) {
     return (
-      <View style={homeStyles.notAuth}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#E0F7FA',
+        }}
+      >
         <Text>You are not logged in.</Text>
       </View>
     );
   }
 
   return (
-    <View>
-        <NavBar />
-    
-    <View style={homeStyles.container}>
-      <Text style={homeStyles.welcomeText}>Welcome, {user.email}!</Text>
-      <Text style={homeStyles.subText}>You are logged in.</Text>
-    </View>
+    <View style={{ flex: 1, backgroundColor: '#E0F7FA' }}>
+      <NavBar />
+
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 16,
+        }}
+      >
+        <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
+          Welcome, {user.email}!
+        </Text>
+        <Text style={{ fontSize: 16, color: '#666' }}>You are logged in.</Text>
+
+        <TouchableOpacity
+          style={{
+            marginTop: 30,
+            backgroundColor: '#2894B0',
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+            borderRadius: 8,
+          }}
+          onPress={() => navigation.navigate('OpenPacks')}
+        >
+          <Text
+            style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}
+          >
+            🎁 Open Packs
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

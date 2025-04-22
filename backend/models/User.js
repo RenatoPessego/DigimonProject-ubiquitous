@@ -1,20 +1,20 @@
+// backend/models/User.js
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  profileImage: { type: String, default: 'profile-placeholder.png' },
-  birthDate: { type: Date, required: true },
-  balance: { type: Number, default: 0 },
-  cards: [
-  {
-    id: { type: String, required: true },
-    quantity: { type: Number, default: 1 }
-  }
-],
+const cardSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  quantity: { type: Number, default: 1 },
+});
 
+const userSchema = new mongoose.Schema({
+  name: String,
+  username: String,
+  email: String,
+  password: String,
+  birthDate: Date,
+  balance: { type: Number, default: 0 },
+  profileImage: String,
+  cards: [cardSchema],
 });
 
 module.exports = mongoose.model('User', userSchema);
