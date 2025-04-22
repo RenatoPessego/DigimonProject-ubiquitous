@@ -12,14 +12,14 @@ export default function WelcomePage({ navigation }) {
           style={welcomeStyles.button}
           onPress={() => navigation.navigate('Login')}
         >
-          <Text style={welcomeStyles.buttonText}>ENTRAR</Text>
+          <Text style={welcomeStyles.buttonText}>LOGIN</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={welcomeStyles.button}
           onPress={() => navigation.navigate('Register')}
         >
-          <Text style={welcomeStyles.buttonText}>REGISTAR</Text>
+          <Text style={welcomeStyles.buttonText}>REGISTER</Text>
         </TouchableOpacity>
       </View>
     </View>

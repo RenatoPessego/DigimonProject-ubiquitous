@@ -3,6 +3,7 @@ import { View, Text, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 import { homeStyles } from '../styles/homeStyles';
+import NavBar from '../components/NavBar';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -57,9 +58,13 @@ export default function HomePage() {
   }
 
   return (
+    <View>
+        <NavBar />
+    
     <View style={homeStyles.container}>
       <Text style={homeStyles.welcomeText}>Welcome, {user.email}!</Text>
       <Text style={homeStyles.subText}>You are logged in.</Text>
+    </View>
     </View>
   );
 }
