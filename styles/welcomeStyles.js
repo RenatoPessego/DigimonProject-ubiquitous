@@ -1,5 +1,4 @@
 // styles/welcomeStyles.js
-
 import { StyleSheet } from 'react-native';
 
 export const welcomeStyles = StyleSheet.create({
