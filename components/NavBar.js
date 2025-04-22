@@ -24,8 +24,8 @@ export default function NavBar() {
 
         {/* Right - Profile + Cart */}
         <View style={NavBarStyles.rightIcons}>
-          <TouchableOpacity>
-            <Image source={require('../assets/profile-placeholder.png')} style={NavBarStyles.profile} />
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+            <Image source={require('../assets/profile-placeholder.png')} style={NavBarStyles.profile}/>
           </TouchableOpacity>
           <TouchableOpacity>
             <Image source={require('../assets/cart-icon.png')} style={NavBarStyles.cart} />
