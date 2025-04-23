@@ -2,6 +2,12 @@ const User = require('../models/User');
 const packs = require('../packsData');
 const fetch = require('node-fetch');
 
+// In-memory cache to avoid repeated API requests
+const rarityCache = {};
+
+/**
+ * Selects a rarity based on the pack's rarity probabilities
+ */
 function getRandomRarity(rarityWeights) {
   const rand = Math.random();
   let sum = 0;
@@ -9,19 +15,25 @@ function getRandomRarity(rarityWeights) {
     sum += weight;
     if (rand <= sum) return rarity;
   }
-  return 'c';
+  return 'Common'; // Fallback if none selected
 }
 
+/**
+ * GET /packs - Returns all available packs
+ */
 exports.getAllPacks = (req, res) => {
   res.json(packs);
 };
 
+/**
+ * POST /packs/:id/open - Opens a pack and adds cards to the user's collection
+ */
 exports.openPack = async (req, res) => {
   try {
     const packId = req.params.id;
     const userId = req.user.id;
-    const pack = packs.find(p => p.id === packId);
 
+    const pack = packs.find(p => p.id === packId);
     if (!pack) return res.status(404).json({ message: 'Pack not found' });
 
     const user = await User.findById(userId);
@@ -35,28 +47,48 @@ exports.openPack = async (req, res) => {
 
     for (let i = 0; i < pack.cardsPerPack; i++) {
       const rarity = getRandomRarity(pack.rarities);
-      const apiRes = await fetch(`https://digimoncard.io/api-public/search.php?rarity=${rarity}`);
-      const apiData = await apiRes.json();
+      console.log(`🃏 Picked rarity: ${rarity}`);
 
-      if (!Array.isArray(apiData) || apiData.length === 0) continue;
+      // Fetch and cache cards of this rarity if not already cached
+      if (!rarityCache[rarity]) {
+        console.log(`Fetching cards with rarity "${rarity}" from YGO API...`);
+        const response = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?rarity=${encodeURIComponent(rarity)}`);
+        const data = await response.json();
 
-      const selected = apiData[Math.floor(Math.random() * apiData.length)];
-      cards.push(selected);
+        if (!data.data || !Array.isArray(data.data)) {
+          console.warn(`⚠️ No cards found for rarity ${rarity}`);
+          continue;
+        }
 
-      const existing = user.cards.find(c => c.id === selected.id);
+        rarityCache[rarity] = data.data;
+      }
+
+      const availableCards = rarityCache[rarity];
+      const selected = availableCards[Math.floor(Math.random() * availableCards.length)];
+
+      cards.push({
+        id: selected.id.toString(),
+        name: selected.name,
+        image_url: selected.card_images?.[0]?.image_url || null,
+        rarity: rarity
+      });
+
+      // Add to user's collection
+      const existing = user.cards.find(c => c.id === selected.id.toString());
       if (existing) {
         existing.quantity += 1;
       } else {
-        user.cards.push({ id: selected.id, quantity: 1 });
+        user.cards.push({ id: selected.id.toString(), quantity: 1 });
       }
     }
 
+    // Deduct pack cost
     user.balance -= pack.price;
     await user.save();
 
-    res.status(200).json({ cards });
+    return res.status(200).json({ cards });
   } catch (err) {
-    console.error('Error opening pack:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('❌ Error opening pack:', err.message);
+    return res.status(500).json({ message: 'Server error' });
   }
 };

@@ -25,7 +25,6 @@ export default function OpenPacksPage() {
 
   const fetchPacks = async () => {
     try {
-      
       const res = await fetch(`${API_URL}/packs`);
       const data = await res.json();
       setPacks(data);
@@ -45,17 +44,15 @@ export default function OpenPacksPage() {
       const token = await AsyncStorage.getItem('authToken');
       if (!token) throw new Error('Not authenticated');
 
-      const res = await fetch(`${API_URL}/cards/open-pack`, {
+      const res = await fetch(`${API_URL}/packs/${packId}/open`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ packId }),
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || 'Failed to open pack');
 
       setRewardedCards(data.cards);
@@ -83,13 +80,11 @@ export default function OpenPacksPage() {
   };
 
   const renderPack = ({ item }) => (
-    
     <TouchableOpacity
       style={styles.packBox}
       onPress={() => confirmOpen(item)}
       disabled={openingPackId !== null}
     >
-    
       <Image
         source={{ uri: `${API_URL}/assets/${item.imageUrl}` }}
         style={styles.packImage}
@@ -137,13 +132,13 @@ export default function OpenPacksPage() {
             <Text style={styles.revealTitle}>✨ You got:</Text>
             <Image
               source={{
-                uri: `https://images.digimoncard.io/images/cards/${rewardedCards[selectedIndex].id}.jpg`,
+                uri: rewardedCards[selectedIndex].image_url,
               }}
               style={styles.cardImage}
             />
             <Text style={styles.cardName}>{rewardedCards[selectedIndex].name}</Text>
             <Text style={styles.cardRarity}>
-              Rarity: {rewardedCards[selectedIndex].rarity.toUpperCase()}
+              Rarity: {rewardedCards[selectedIndex].rarity?.toUpperCase() || 'N/A'}
             </Text>
 
             <View style={styles.navigationButtons}>

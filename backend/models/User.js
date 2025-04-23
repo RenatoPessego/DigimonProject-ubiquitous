@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema({
-  id: { type: String, required: true },
+  id: { type: String, required: true }, 
   quantity: { type: Number, default: 1 },
 });
 

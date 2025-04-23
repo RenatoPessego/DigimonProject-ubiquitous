@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const [cardsInfo, setCardsInfo] = useState([]);
   const [loadingCards, setLoadingCards] = useState(true);
 
+  // Fetch user profile using stored auth token
   const fetchProfile = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
@@ -46,12 +47,14 @@ export default function ProfilePage() {
     }
   };
 
+  // Slice user cards for pagination
   const getPaginatedCards = () => {
     if (!user || !Array.isArray(user.cards)) return [];
     const start = (currentPage - 1) * cardsPerPage;
     return user.cards.slice(start, start + cardsPerPage);
   };
 
+  // Fetch full card details from YGOProDeck API or cache
   const fetchCardDetails = async () => {
     const paginated = getPaginatedCards();
     setLoadingCards(true);
@@ -76,34 +79,45 @@ export default function ProfilePage() {
     const fetchedCards = await Promise.all(
       cardsToFetch.map(async (card) => {
         try {
-          const res = await fetch(`https://digimoncard.io/api-public/search.php?card=${card.id}`);
+          if (!card.id) return null;
+
+          const cleanId = parseInt(card.id); // ensure numeric ID
+          const res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${encodeURIComponent(cleanId)}`);
           const data = await res.json();
 
-          if (!Array.isArray(data) || data.length === 0) {
+          if (!data.data || data.data.length === 0) {
             return {
               id: card.id,
               name: 'Unknown Card',
-              image: 'placeholder',
+              image_url: null,
               quantity: card.quantity,
             };
           }
 
-          const result = { ...data[0], quantity: card.quantity };
-          await AsyncStorage.setItem(`card_${card.id}`, JSON.stringify(data[0]));
+          const cardData = data.data[0];
+
+          const result = {
+            id: card.id,
+            name: cardData.name,
+            image_url: cardData.card_images?.[0]?.image_url || null,
+            quantity: card.quantity,
+          };
+
+          await AsyncStorage.setItem(`card_${card.id}`, JSON.stringify(result));
           return result;
         } catch (err) {
           console.warn(`❌ Error fetching card ${card.id}:`, err.message);
           return {
             id: card.id,
             name: 'Unknown Card',
-            image: 'placeholder',
+            image_url: null,
             quantity: card.quantity,
           };
         }
       })
     );
 
-    const allCards = [...finalCards, ...fetchedCards];
+    const allCards = [...finalCards, ...fetchedCards.filter(Boolean)];
     setCardsInfo(allCards);
     setLoadingCards(false);
   };
@@ -144,9 +158,9 @@ export default function ProfilePage() {
         <>
           <Image
             source={
-              item.image === 'placeholder'
-                ? require('../assets/not-found-card.png')
-                : { uri: `https://images.digimoncard.io/images/cards/${item.id}.jpg` }
+              item.image_url
+                ? { uri: item.image_url }
+                : require('../assets/not-found-card.png')
             }
             style={profileStyles.cardImage}
           />
@@ -183,9 +197,7 @@ export default function ProfilePage() {
             </Text>
 
             {cardsInfo.length > 0 && (
-              <>
-                <Text style={profileStyles.sectionTitle}>Your Cards</Text>
-              </>
+              <Text style={profileStyles.sectionTitle}>Your Cards</Text>
             )}
           </>
         }

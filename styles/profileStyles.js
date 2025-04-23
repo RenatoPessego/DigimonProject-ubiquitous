@@ -1,4 +1,8 @@
-import { StyleSheet } from 'react-native';
+// styles/profileStyles.js
+import { StyleSheet, Dimensions } from 'react-native';
+
+const screenWidth = Dimensions.get('window').width;
+const cardWidth = screenWidth / 3 - 30;
 
 export const profileStyles = StyleSheet.create({
   loadingContainer: {
@@ -69,17 +73,18 @@ export const profileStyles = StyleSheet.create({
   },
 
   cardBox: {
-    width: 100,
+    width: cardWidth,
     margin: 10,
     alignItems: 'center',
   },
 
   cardImage: {
-    width: 90,
-    height: 125,
+    width: cardWidth - 10,
+    height: 130,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#ccc',
+    resizeMode: 'cover',
   },
 
   cardName: {
@@ -114,11 +119,11 @@ export const profileStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#003A49',
   },
-  cardGrid: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  justifyContent: 'center',
-  gap: 12,
-},
 
+  cardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 12,
+  },
 });
