@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -14,106 +14,94 @@ import { API_URL } from '../config';
 import { openPacksStyles as styles } from '../styles/openPacksStyles';
 import NavBar from '../components/NavBar';
 
-const PACKS = [
-  {
-    id: 'free_pack',
-    title: 'Free Pack',
-    price: 0,
-    description: '1 random card - mostly common',
-    image: require('../assets/free-pack.png'),
-    quantity: 1,
-  },
-  {
-    id: 'starter_pack',
-    title: 'Starter Pack',
-    price: 50,
-    description: '3 cards - chance of rare',
-    image: require('../assets/free-pack.png'),
-    quantity: 3,
-  },
-];
-
 export default function OpenPacksPage() {
-  const [loadingPackId, setLoadingPackId] = useState(null);
-  const [resultCards, setResultCards] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [packs, setPacks] = useState([]);
+  const [loadingPacks, setLoadingPacks] = useState(true);
+  const [openingPackId, setOpeningPackId] = useState(null);
+  const [rewardedCards, setRewardedCards] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showResult, setShowResult] = useState(false);
   const navigation = useNavigation();
 
-  const openPack = async (pack) => {
-    setLoadingPackId(pack.id);
-    setResultCards([]);
-    setCurrentIndex(0);
+  const fetchPacks = async () => {
+    try {
+      
+      const res = await fetch(`${API_URL}/packs`);
+      const data = await res.json();
+      setPacks(data);
+    } catch (err) {
+      Alert.alert('Error', 'Failed to load packs');
+    } finally {
+      setLoadingPacks(false);
+    }
+  };
+
+  const openPack = async (packId) => {
+    setOpeningPackId(packId);
+    setRewardedCards([]);
+    setShowResult(false);
 
     try {
       const token = await AsyncStorage.getItem('authToken');
       if (!token) throw new Error('Not authenticated');
 
-      const cards = [];
+      const res = await fetch(`${API_URL}/cards/open-pack`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ packId }),
+      });
 
-      for (let i = 0; i < pack.quantity; i++) {
-        const rarityRoll = Math.random();
-        const rarity = rarityRoll < 0.95 ? 'c' : 'sr';
+      const data = await res.json();
 
-        const res = await fetch(`https://digimoncard.io/api-public/search.php?rarity=${rarity}`);
-        const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to open pack');
 
-        if (!Array.isArray(data) || data.length === 0) {
-          throw new Error('No cards found from API');
-        }
-
-        const randomCard = data[Math.floor(Math.random() * data.length)];
-
-        const backendRes = await fetch(`${API_URL}/cards/add`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ cardId: randomCard.id }),
-        });
-
-        if (!backendRes.ok) {
-          const err = await backendRes.json();
-          throw new Error(err.message || 'Failed to add card');
-        }
-
-        cards.push(randomCard);
-      }
-
-      setResultCards(cards);
-      setCurrentIndex(0);
+      setRewardedCards(data.cards);
+      setSelectedIndex(0);
+      setShowResult(true);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Something went wrong opening the pack');
+      Alert.alert('Error', err.message || 'Could not open pack');
     } finally {
-      setLoadingPackId(null);
+      setOpeningPackId(null);
     }
   };
 
   const confirmOpen = (pack) => {
     Alert.alert(
       'Open Pack',
-      `Do you want to open "${pack.title}" for ${pack.price} 🪙?`,
+      `Do you want to open "${pack.name}" for ${pack.price} 🪙?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Open',
-          onPress: () => openPack(pack),
+          onPress: () => openPack(pack.id),
         },
       ]
     );
   };
 
   const renderPack = ({ item }) => (
+    
     <TouchableOpacity
       style={styles.packBox}
       onPress={() => confirmOpen(item)}
-      disabled={loadingPackId !== null}
+      disabled={openingPackId !== null}
     >
-      <Image source={item.image} style={styles.packImage} />
-      <Text style={styles.packTitle}>{item.title}</Text>
+    
+      <Image
+        source={{ uri: `${API_URL}/assets/${item.imageUrl}` }}
+        style={styles.packImage}
+      />
+      <Text style={styles.packTitle}>{item.name}</Text>
       <Text style={styles.packPrice}>{item.price} 🪙</Text>
     </TouchableOpacity>
   );
+
+  useEffect(() => {
+    fetchPacks();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -121,23 +109,27 @@ export default function OpenPacksPage() {
       <View style={styles.content}>
         <Text style={styles.title}>🎁 Available Packs</Text>
 
-        <FlatList
-          data={PACKS}
-          keyExtractor={(item) => item.id}
-          numColumns={3}
-          renderItem={renderPack}
-          contentContainerStyle={styles.packGrid}
-        />
+        {loadingPacks ? (
+          <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            data={packs}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            contentContainerStyle={styles.packGrid}
+            renderItem={renderPack}
+          />
+        )}
 
-        {loadingPackId && (
+        {openingPackId && (
           <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 20 }} />
         )}
 
-        {resultCards.length > 0 && (
+        {showResult && rewardedCards.length > 0 && (
           <View style={styles.cardReveal}>
             <TouchableOpacity
+              onPress={() => setShowResult(false)}
               style={styles.closeButton}
-              onPress={() => setResultCards([])}
             >
               <Text style={styles.closeText}>✖</Text>
             </TouchableOpacity>
@@ -145,38 +137,32 @@ export default function OpenPacksPage() {
             <Text style={styles.revealTitle}>✨ You got:</Text>
             <Image
               source={{
-                uri: `https://images.digimoncard.io/images/cards/${resultCards[currentIndex].id}.jpg`,
+                uri: `https://images.digimoncard.io/images/cards/${rewardedCards[selectedIndex].id}.jpg`,
               }}
               style={styles.cardImage}
             />
-            <Text style={styles.cardName}>{resultCards[currentIndex].name}</Text>
+            <Text style={styles.cardName}>{rewardedCards[selectedIndex].name}</Text>
             <Text style={styles.cardRarity}>
-              Rarity: {resultCards[currentIndex].rarity.toUpperCase()}
+              Rarity: {rewardedCards[selectedIndex].rarity.toUpperCase()}
             </Text>
 
-            <View style={styles.carouselControls}>
+            <View style={styles.navigationButtons}>
               <TouchableOpacity
-                style={styles.arrowButton}
-                onPress={() => setCurrentIndex((prev) => Math.max(prev - 1, 0))}
-                disabled={currentIndex === 0}
+                disabled={selectedIndex === 0}
+                onPress={() => setSelectedIndex((i) => i - 1)}
               >
-                <Text style={styles.arrowText}>◀</Text>
+                <Text style={styles.arrow}>◀</Text>
               </TouchableOpacity>
 
-              <Text style={styles.cardIndex}>
-                {currentIndex + 1} / {resultCards.length}
+              <Text style={styles.indexText}>
+                {selectedIndex + 1} / {rewardedCards.length}
               </Text>
 
               <TouchableOpacity
-                style={styles.arrowButton}
-                onPress={() =>
-                  setCurrentIndex((prev) =>
-                    Math.min(prev + 1, resultCards.length - 1)
-                  )
-                }
-                disabled={currentIndex === resultCards.length - 1}
+                disabled={selectedIndex === rewardedCards.length - 1}
+                onPress={() => setSelectedIndex((i) => i + 1)}
               >
-                <Text style={styles.arrowText}>▶</Text>
+                <Text style={styles.arrow}>▶</Text>
               </TouchableOpacity>
             </View>
           </View>

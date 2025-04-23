@@ -6,6 +6,12 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const cardRoutes = require('./routes/cards'); // ok
 require('./config/passport')(passport);
+const packRoutes = require('./routes/packs');
+
+
+const path = require('path');
+
+
 
 const app = express();
 const PORT = 5000;
@@ -25,6 +31,8 @@ app.use(passport.initialize());
 // Routes
 app.use('/auth', authRoutes);
 app.use('/cards', cardRoutes);
+app.use('/packs', packRoutes);
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

@@ -4,6 +4,8 @@ const router = express.Router();
 const verifyToken = require('../middleware/authMiddleware');
 const cardsController = require('../controllers/cardsController');
 
-router.post('/add', verifyToken, cardsController.addCardToUser);
+
+router.post('/open-pack', verifyToken, cardsController.openPack);
+
 
 module.exports = router;
