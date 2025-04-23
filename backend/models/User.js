@@ -2,8 +2,10 @@
 const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema({
-  id: { type: String, required: true }, 
+  id: { type: String, required: true },
   quantity: { type: Number, default: 1 },
+  rarity: { type: String },
+  pack: { type: String },   
 });
 
 const userSchema = new mongoose.Schema({

@@ -12,7 +12,7 @@ module.exports = [
   {
     id: 'starter_pack',
     name: 'Starter Pack',
-    price: 50,
+    price: 10,
     cardsPerPack: 3,
     rarities: {
       "Common": 0.85,
@@ -24,7 +24,7 @@ module.exports = [
   {
     id: 'premium_pack',
     name: 'Premium Pack',
-    price: 150,
+    price: 20,
     cardsPerPack: 5,
     rarities: {
       "Common": 0.4,

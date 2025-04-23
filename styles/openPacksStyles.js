@@ -1,138 +1,144 @@
-import { StyleSheet, Dimensions } from 'react-native';
-
-const screenWidth = Dimensions.get('window').width;
-const cardWidth = screenWidth / 2.5;
-
-export const openPacksStyles = StyleSheet.create({
+export const openPacksStyles = {
   container: {
     flex: 1,
     backgroundColor: '#E0F7FA',
   },
-
   content: {
-    paddingTop: 16,
-    paddingBottom: 80,
-    alignItems: 'center',
+    flex: 1,
+    padding: 16,
   },
-
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#222',
+    marginBottom: 12,
+    textAlign: 'center',
   },
-
-  packGrid: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-
-  packBox: {
-    width: cardWidth,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    margin: 8,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-
-  packImage: {
-    width: '100%',
-    height: cardWidth * 1.2,
-    resizeMode: 'contain',
-    borderRadius: 8,
-  },
-
-  packTitle: {
-    marginTop: 10,
+  label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
+    marginBottom: 4,
+    marginTop: 12,
     color: '#333',
   },
-
-  packPrice: {
-    marginTop: 4,
-    fontSize: 14,
-    color: '#2894B0',
+  pickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    elevation: 2,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 60,
+    width: '100%',
+    color: '#333',
+    fontSize: 16,
+    paddingVertical: 12,
+    justifyContent: 'center',
+  },
+  generateButton: {
+    backgroundColor: '#2894B0',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignSelf: 'center',
+    borderRadius: 10,
+    marginTop: 16,
+  },
+  generateButtonText: {
+    color: 'white',
     fontWeight: 'bold',
+    fontSize: 16,
+  },
+  largePack: {
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  packImage: {
+    width: 140,
+    height: 200,
+    marginBottom: 10,
+    resizeMode: 'contain',
+  },
+  packTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  packPrice: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 12,
+  },
+  openButton: {
+    backgroundColor: '#28A745',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  openButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
   },
 
-  // Card Reveal Styles
+  // 📦 Card Reveal Overlay
   cardReveal: {
     position: 'absolute',
-    top: '15%',
+    top: 80,
     left: 20,
     right: 20,
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 20,
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
+    zIndex: 100,
   },
-
   closeButton: {
     position: 'absolute',
     top: 10,
     right: 10,
+    padding: 5,
+    zIndex: 101,
   },
-
   closeText: {
-    fontSize: 22,
-    color: '#555',
-  },
-
-  revealTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
+    fontSize: 24,
     color: '#333',
   },
-
+  revealTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
   cardImage: {
     width: 180,
     height: 260,
     resizeMode: 'contain',
-    borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 10,
   },
-
   cardName: {
     fontSize: 18,
     fontWeight: '600',
+    marginBottom: 4,
     textAlign: 'center',
-    color: '#222',
   },
-
   cardRarity: {
-    fontSize: 14,
-    marginTop: 6,
-    color: '#888',
-  },
-
-  navigationButtons: {
-    marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 20,
-  },
-
-  arrow: {
-    fontSize: 24,
-    color: '#2894B0',
-  },
-
-  indexText: {
     fontSize: 16,
     color: '#555',
+    marginBottom: 10,
   },
-});
+  navigationButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  arrow: {
+    fontSize: 24,
+    color: '#444',
+    paddingHorizontal: 20,
+  },
+  indexText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+};
