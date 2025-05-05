@@ -262,8 +262,49 @@ export default function ProfilePage() {
   
 
   const handleSellOnMarket = () => {
-    Alert.alert('Coming Soon', 'This feature will be available in a future update.');
+    Alert.prompt(
+      'Sell on Market',
+      `Enter price to list 1x "${selectedCard.name}" for:`,
+      async (input) => {
+        const price = parseFloat(input);
+        if (isNaN(price) || price <= 0) {
+          Alert.alert('Invalid price', 'Please enter a valid number.');
+          return;
+        }
+  
+        try {
+          const token = await AsyncStorage.getItem('authToken');
+          const res = await fetch(`${API_URL}/market/sell`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              cardId: selectedCard.id,
+              rarity: selectedCard.rarity,
+              pack: selectedCard.packSource || selectedCard.pack,
+              price
+            }),
+          });
+  
+          const data = await res.json();
+          if (res.ok) {
+            setUser(data.user); // atualizar inventário
+            setModalVisible(false);
+            Alert.alert('Listed', `Card listed for ${price} 🪙`);
+          } else {
+            Alert.alert('Error', data.message || 'Could not list card');
+          }
+        } catch (err) {
+          console.warn('❌ Sell on market error:', err.message);
+          Alert.alert('Error', 'Something went wrong');
+        }
+      },
+      'plain-text'
+    );
   };
+  
 
   const renderCard = ({ item }) => {
     if (item.placeholder) return <View style={{ width: '30%', margin: '1.5%' }} />;

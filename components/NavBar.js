@@ -40,7 +40,7 @@ export default function NavBar() {
           <TouchableOpacity onPress={() => setProfileMenuVisible(!profileMenuVisible)}>
             <Image source={require('../assets/profile-placeholder.png')} style={NavBarStyles.profile} />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Market')}>
             <Image source={require('../assets/cart-icon.png')} style={NavBarStyles.cart} />
           </TouchableOpacity>
         </View>
@@ -53,8 +53,19 @@ export default function NavBar() {
           onPress={() => setMenuVisible(false)}
         >
           <View style={NavBarStyles.dropdown}>
-            <Text style={NavBarStyles.dropdownItem} onPress={() => console.log('Buy')}>Buy</Text>
-            <Text style={NavBarStyles.dropdownItem} onPress={() => console.log('Sell')}>Sell</Text>
+            <TouchableOpacity onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate('Market');
+            }}>
+              <Text style={NavBarStyles.dropdownItem}>Buy</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate('SellCard');
+            }}>
+              <Text style={NavBarStyles.dropdownItem}>Sell</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>

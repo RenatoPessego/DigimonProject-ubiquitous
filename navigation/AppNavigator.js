@@ -8,6 +8,8 @@ import RegisterPage from '../pages/RegisterPage';
 import HomePage from '../pages/HomePage';
 import ProfilePage from '../pages/ProfilePage';
 import OpenPacksPage from '../pages/OpenPacksPage';
+import MarketPage from '../pages/MarketPage';
+import SellCardPage from '../pages/SellCardPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +23,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Home" component={HomePage} />
         <Stack.Screen name="Profile" component={ProfilePage} />
         <Stack.Screen name="OpenPacks" component={OpenPacksPage} />
+        <Stack.Screen name="Market" component={MarketPage} />
+        <Stack.Screen name="SellCard" component={SellCardPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );

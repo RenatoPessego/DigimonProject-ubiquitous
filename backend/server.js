@@ -7,6 +7,8 @@ const authRoutes = require('./routes/auth');
 const cardRoutes = require('./routes/cards'); // ok
 require('./config/passport')(passport);
 const packRoutes = require('./routes/packs');
+const marketRoutes = require('./routes/market');
+
 
 
 const path = require('path');
@@ -32,6 +34,7 @@ app.use(passport.initialize());
 app.use('/auth', authRoutes);
 app.use('/cards', cardRoutes);
 app.use('/packs', packRoutes);
+app.use('/market', marketRoutes);
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.listen(PORT, () => {
