@@ -1,6 +1,7 @@
 // controllers/marketController.js
 const MarketListing = require('../models/MarketListing');
 const User = require('../models/User');
+const Message = require('../models/Message');
 
 // Colocar carta à venda
 exports.sellCard = async (req, res) => {
@@ -26,7 +27,7 @@ exports.sellCard = async (req, res) => {
   const listing = new MarketListing({ sellerId: userId, cardId, rarity, pack, price });
   await listing.save();
 
-  res.status(201).json({ message: 'Card listed for sale' });
+  res.status(201).json({ message: 'Card listed for sale', user });
 };
 
 // Comprar carta
@@ -70,6 +71,7 @@ exports.buyCard = async (req, res) => {
   await seller.save();
 
   // Remover anúncio
+  await Message.deleteMany({ listingId: listing._id });
   await listing.deleteOne();
 
   res.status(200).json({ message: 'Purchase successful' });
@@ -97,4 +99,78 @@ exports.getUserCards = async (req, res) => {
       res.status(500).json({ message: 'Error fetching user cards' });
     }
   };
+
+  // GET /market/mylistings
+exports.getMyListings = async (req, res) => {
+  try {
+    const listings = await MarketListing.find({ sellerId: req.user.id });
+    res.status(200).json({ listings });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch listings' });
+  }
+};
+
+// DELETE /market/:id
+exports.deleteListing = async (req, res) => {
+  try {
+    const listing = await MarketListing.findById(req.params.id);
+    if (!listing) {
+      console.log('❌ Listing not found for ID:', req.params.id);
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
+    const userId = req.user.id || req.user._id;
+    if (listing.sellerId.toString() !== userId) {
+      console.log('⛔ Not authorized');
+      return res.status(403).json({ message: 'Not authorized to delete this listing' });
+    }
+
+    // ✅ Repor carta ao inventário do utilizador
+    const user = await User.findById(userId);
+    const existing = user.cards.find(
+      (c) => c.id === listing.cardId && c.rarity === listing.rarity && c.pack === listing.pack
+    );
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      user.cards.push({
+        id: listing.cardId,
+        rarity: listing.rarity,
+        pack: listing.pack,
+        quantity: 1
+      });
+    }
+
+    await user.save();
+    await Message.deleteMany({ listingId: listing._id });
+    await listing.deleteOne();
+
+    console.log('✅ Listing removed and messages deleted');
+    res.status(200).json({ message: 'Listing removed and messages deleted' });
+  } catch (err) {
+    console.error('❌ Error removing listing:', err);
+    res.status(500).json({ message: 'Error removing listing', error: err.message });
+  }
+};
+
+
+
+// PUT /market/:id
+exports.updateListing = async (req, res) => {
+  try {
+    const { price } = req.body;
+    const listing = await MarketListing.findById(req.params.id);
+
+    if (!listing) return res.status(404).json({ message: 'Listing not found' });
+    if (listing.sellerId.toString() !== req.user.id)
+      return res.status(403).json({ message: 'Not authorized' });
+
+    listing.price = price;
+    await listing.save();
+    res.status(200).json({ message: 'Price updated', listing });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating listing' });
+  }
+};
   

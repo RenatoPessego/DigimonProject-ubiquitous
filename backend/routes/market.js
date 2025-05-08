@@ -16,5 +16,15 @@ router.get('/', verifyToken, marketController.getMarketListings);
 // Ver cartas do utilizador
 router.get('/mycards', verifyToken, marketController.getUserCards);
 
+// Ver cartas à venda do utilizador
+router.get('/mylistings', verifyToken, marketController.getMyListings);
+
+// Deletar carta à venda
+router.delete('/:id', verifyToken, marketController.deleteListing);
+
+// Atualizar carta à venda
+router.put('/:id', verifyToken, marketController.updateListing);
+
+
 
 module.exports = router;

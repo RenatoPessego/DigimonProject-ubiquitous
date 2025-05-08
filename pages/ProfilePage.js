@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   FlatList,
   Modal,
+  TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -25,6 +26,9 @@ export default function ProfilePage() {
   const [loadingCards, setLoadingCards] = useState(true);
   const [selectedCard, setSelectedCard] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [sellMarketVisible, setSellMarketVisible] = useState(false);
+  const [customPrice, setCustomPrice] = useState('');
+
 
   const fetchProfile = async () => {
     try {
@@ -262,47 +266,8 @@ export default function ProfilePage() {
   
 
   const handleSellOnMarket = () => {
-    Alert.prompt(
-      'Sell on Market',
-      `Enter price to list 1x "${selectedCard.name}" for:`,
-      async (input) => {
-        const price = parseFloat(input);
-        if (isNaN(price) || price <= 0) {
-          Alert.alert('Invalid price', 'Please enter a valid number.');
-          return;
-        }
-  
-        try {
-          const token = await AsyncStorage.getItem('authToken');
-          const res = await fetch(`${API_URL}/market/sell`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              cardId: selectedCard.id,
-              rarity: selectedCard.rarity,
-              pack: selectedCard.packSource || selectedCard.pack,
-              price
-            }),
-          });
-  
-          const data = await res.json();
-          if (res.ok) {
-            setUser(data.user); // atualizar inventário
-            setModalVisible(false);
-            Alert.alert('Listed', `Card listed for ${price} 🪙`);
-          } else {
-            Alert.alert('Error', data.message || 'Could not list card');
-          }
-        } catch (err) {
-          console.warn('❌ Sell on market error:', err.message);
-          Alert.alert('Error', 'Something went wrong');
-        }
-      },
-      'plain-text'
-    );
+    setCustomPrice(selectedCard?.price?.toString() || '');
+    setSellMarketVisible(true);
   };
   
 
@@ -453,6 +418,79 @@ export default function ProfilePage() {
                 onPress={handleSellOnMarket}
               >
                 <Text style={{ color: '#333', fontWeight: 'bold' }}>Sell on Market</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal visible={sellMarketVisible} transparent animationType="fade">
+        <View style={profileStyles.modalOverlay}>
+          <View style={[profileStyles.modalContent, { padding: 20 }]}>
+            <Text style={profileStyles.modalTitle}>Sell on Market</Text>
+            <Text style={{ marginBottom: 10 }}>
+              Enter price to list 1x "{selectedCard?.name}" on the market:
+            </Text>
+            <TextInput
+              value={customPrice}
+              onChangeText={setCustomPrice}
+              keyboardType="numeric"
+              placeholder="Ex: 3.50"
+              style={{
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 6,
+                padding: 10,
+                marginBottom: 15
+              }}
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TouchableOpacity
+                onPress={() => setSellMarketVisible(false)}
+                style={{ backgroundColor: '#999', padding: 10, borderRadius: 6 }}
+              >
+                <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  const price = parseFloat(customPrice);
+                  if (isNaN(price) || price <= 0) {
+                    Alert.alert('Invalid price', 'Please enter a valid number.');
+                    return;
+                  }
+
+                  try {
+                    const token = await AsyncStorage.getItem('authToken');
+                    const res = await fetch(`${API_URL}/market/sell`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({
+                        cardId: selectedCard.id,
+                        rarity: selectedCard.rarity,
+                        pack: selectedCard.packSource || selectedCard.pack,
+                        price
+                      }),
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                      setUser(data.user);
+                      setSellMarketVisible(false);
+                      setModalVisible(false);
+                      Alert.alert('Listed!', `Card listed for ${price.toFixed(2)} 🪙`);
+                    } else {
+                      Alert.alert('Error', data.message || 'Could not list card');
+                    }
+                  } catch (err) {
+                    console.warn('❌ Sell on market error:', err.message);
+                    Alert.alert('Error', 'Something went wrong');
+                  }
+                }}
+                style={{ backgroundColor: '#2894B0', padding: 10, borderRadius: 6 }}
+              >
+                <Text style={{ color: 'white', fontWeight: 'bold' }}>Confirm</Text>
               </TouchableOpacity>
             </View>
           </View>

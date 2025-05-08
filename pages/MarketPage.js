@@ -9,6 +9,7 @@ import {
   Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../config';
 import { marketStyles as styles } from '../styles/marketStyles';
 import NavBar from '../components/NavBar';
@@ -16,6 +17,7 @@ import NavBar from '../components/NavBar';
 export default function MarketPage() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
   const fetchListings = async () => {
     try {
@@ -75,6 +77,15 @@ export default function MarketPage() {
         <Text style={styles.cardPrice}>{item.price} 🪙</Text>
         <TouchableOpacity style={styles.buyButton} onPress={() => handleBuy(item._id)}>
           <Text style={styles.buyButtonText}>Buy</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.buyButton, { backgroundColor: '#555', marginTop: 6 }]}
+          onPress={() => navigation.navigate('Chat', {
+            listingId: item._id,
+            receiverId: item.sellerId?._id
+          })}
+        >
+          <Text style={styles.buyButtonText}>Chat</Text>
         </TouchableOpacity>
       </View>
     </View>

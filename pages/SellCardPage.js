@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
-  Alert
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../config';
 import { marketStyles as styles } from '../styles/marketStyles';
 import NavBar from '../components/NavBar';
@@ -18,6 +19,7 @@ export default function SellCardPage() {
   const [myCards, setMyCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [priceMap, setPriceMap] = useState({}); // cardId+rarity+pack -> price
+  const navigation = useNavigation();
 
   const fetchMyCards = async () => {
     try {
@@ -142,6 +144,20 @@ export default function SellCardPage() {
     <View style={styles.container}>
       <NavBar />
       <Text style={styles.title}>📤 Sell Cards</Text>
+      <TouchableOpacity
+        style={{
+          backgroundColor: '#2894B0',
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          borderRadius: 8,
+          alignSelf: 'center',
+          marginBottom: 15,
+          marginTop: 5,
+        }}
+        onPress={() => navigation.navigate('MyListings')}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>View My Listings</Text>
+      </TouchableOpacity>
       {loading ? (
         <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />
       ) : myCards.length === 0 ? (
