@@ -1,26 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
   Modal,
-  StyleSheet,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config';
 import { NavBarStyles } from '../styles/NavBarStyles';
 
 export default function NavBar() {
   const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('authToken');
     setProfileMenuVisible(false);
     navigation.replace('Welcome');
   };
+
+  // Fetch profile image from the server using the auth token
+  useEffect(() => {
+    const loadProfileImage = async () => {
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+        if (!token) return;
+
+        const res = await fetch(`${API_URL}/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.user?.profileImage) {
+          setProfileImage(data.user.profileImage);
+        }
+      } catch (err) {
+        console.warn('⚠️ Failed to load profile image:', err.message);
+      }
+    };
+
+    loadProfileImage();
+  }, []);
 
   return (
     <>
@@ -38,7 +63,14 @@ export default function NavBar() {
         {/* Right - Profile + Cart */}
         <View style={NavBarStyles.rightIcons}>
           <TouchableOpacity onPress={() => setProfileMenuVisible(!profileMenuVisible)}>
-            <Image source={require('../assets/profile-placeholder.png')} style={NavBarStyles.profile} />
+            <Image
+              source={
+                profileImage
+                  ? { uri: profileImage }
+                  : require('../assets/profile-placeholder.png')
+              }
+              style={NavBarStyles.profile}
+            />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Market')}>
             <Image source={require('../assets/cart-icon.png')} style={NavBarStyles.cart} />
@@ -93,4 +125,3 @@ export default function NavBar() {
     </>
   );
 }
-

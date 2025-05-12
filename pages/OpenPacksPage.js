@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -12,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 import { openPacksStyles as styles } from '../styles/openPacksStyles';
 import NavBar from '../components/NavBar';
+import * as Animatable from 'react-native-animatable';
 
 export default function OpenPacksPage() {
   const [rarity, setRarity] = useState('common');
@@ -24,6 +26,8 @@ export default function OpenPacksPage() {
   const [cards, setCards] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showCards, setShowCards] = useState(false);
+  const [packOpened, setPackOpened] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const rarityOptions = ['common', 'rare', 'super_rare', 'legendary'];
   const cardCountOptions = [1, 3, 5, 7, 9];
@@ -35,7 +39,7 @@ export default function OpenPacksPage() {
         const data = await res.json();
         if (Array.isArray(data)) {
           setSetList(data.map(set => set.set_name));
-          setPackSource(data[0].set_name); // default
+          setPackSource(data[0].set_name);
         }
       } catch (err) {
         Alert.alert('Error', 'Failed to load pack sets');
@@ -44,14 +48,16 @@ export default function OpenPacksPage() {
     fetchSets();
   }, []);
 
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [selectedIndex]);
+
   const generatePack = async () => {
     try {
       setLoading(true);
       setShowCards(false);
-
       const token = await AsyncStorage.getItem('authToken');
       if (!token) throw new Error('Token missing');
-
       const response = await fetch(`${API_URL}/packs/generate`, {
         method: 'POST',
         headers: {
@@ -60,11 +66,9 @@ export default function OpenPacksPage() {
         },
         body: JSON.stringify({ rarityType: rarity, cardCount, packSource }),
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
-
-      setPack(data.packs[0]); // Use only the first pack
+      setPack(data.packs[0]);
     } catch (err) {
       Alert.alert('Error', err.message || 'Could not generate pack');
     } finally {
@@ -75,32 +79,33 @@ export default function OpenPacksPage() {
   const openPack = async () => {
     try {
       setOpening(true);
-      const token = await AsyncStorage.getItem('authToken');
-      if (!token) throw new Error('Not authenticated');
-
-      const res = await fetch(`${API_URL}/packs/open`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          rarity: pack.rarity,
-          cardCount: pack.cardCount,
-          packSource: pack.packSource,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-
-      setCards(data.cards);
-      setSelectedIndex(0);
-      setShowCards(true);
+      setPackOpened(false);
+      setTimeout(async () => {
+        const token = await AsyncStorage.getItem('authToken');
+        if (!token) throw new Error('Not authenticated');
+        const res = await fetch(`${API_URL}/packs/open`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            rarity: pack.rarity,
+            cardCount: pack.cardCount,
+            packSource: pack.packSource,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        setCards(data.cards);
+        setSelectedIndex(0);
+        setShowCards(true);
+        setPackOpened(true);
+      }, 600);
     } catch (err) {
       Alert.alert('Error', err.message || 'Could not open pack');
     } finally {
-      setOpening(false);
+      setTimeout(() => setOpening(false), 800);
     }
   };
 
@@ -112,12 +117,23 @@ export default function OpenPacksPage() {
           <Text style={styles.closeText}>✖</Text>
         </TouchableOpacity>
         <Text style={styles.revealTitle}>✨ You got:</Text>
+        {imageLoaded ? (
+          <Animatable.View key={card.id} animation="zoomIn" duration={600}>
+            <Image
+              source={card.image_url ? { uri: card.image_url } : require('../assets/not-found-card.png')}
+              style={styles.cardImage}
+            />
+            <Text style={styles.cardName}>{card.name}</Text>
+            <Text style={styles.cardRarity}>Rarity: {card.rarity}</Text>
+          </Animatable.View>
+        ) : (
+          <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 30 }} />
+        )}
         <Image
           source={card.image_url ? { uri: card.image_url } : require('../assets/not-found-card.png')}
-          style={styles.cardImage}
+          onLoadEnd={() => setImageLoaded(true)}
+          style={{ width: 0, height: 0, position: 'absolute' }}
         />
-        <Text style={styles.cardName}>{card.name}</Text>
-        <Text style={styles.cardRarity}>Rarity: {card.rarity}</Text>
         <View style={styles.navigationButtons}>
           <TouchableOpacity disabled={selectedIndex === 0} onPress={() => setSelectedIndex(i => i - 1)}>
             <Text style={styles.arrow}>◀</Text>
@@ -136,17 +152,14 @@ export default function OpenPacksPage() {
       <NavBar />
       <View style={styles.content}>
         <Text style={styles.title}>🧪 Select Pack Filters</Text>
-
         <Text style={styles.label}>Rarity</Text>
         <View style={styles.pickerContainer}>
           <Picker selectedValue={rarity} onValueChange={setRarity} style={styles.picker}>
             {rarityOptions.map(r => (
               <Picker.Item key={r} label={r.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} value={r} />
-
             ))}
           </Picker>
         </View>
-
         <Text style={styles.label}>Cards</Text>
         <View style={styles.pickerContainer}>
           <Picker selectedValue={cardCount} onValueChange={setCardCount} style={styles.picker}>
@@ -155,7 +168,6 @@ export default function OpenPacksPage() {
             ))}
           </Picker>
         </View>
-
         <Text style={styles.label}>Pack</Text>
         <View style={styles.pickerContainer}>
           <Picker selectedValue={packSource} onValueChange={setPackSource} style={styles.picker}>
@@ -164,26 +176,32 @@ export default function OpenPacksPage() {
             ))}
           </Picker>
         </View>
-
         <TouchableOpacity onPress={generatePack} style={styles.generateButton}>
           <Text style={styles.generateButtonText}>Generate</Text>
         </TouchableOpacity>
-
         {loading ? (
           <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 20 }} />
         ) : (
           pack && (
             <View style={styles.largePack}>
-              <Image source={{ uri: pack.imageUrl }} style={styles.packImage} />
+              <Animatable.Image
+                animation={opening ? 'flipOutY' : 'pulse'}
+                duration={opening ? 500 : 2000}
+                iterationCount={opening ? 1 : 'infinite'}
+                easing="ease-in-out"
+                source={{ uri: pack.imageUrl }}
+                style={styles.packImage}
+              />
               <Text style={styles.packTitle}>{pack.name}</Text>
               <Text style={styles.packPrice}>{pack.price} 🪙</Text>
-              <TouchableOpacity onPress={openPack} style={styles.openButton} disabled={opening}>
-                <Text style={styles.openButtonText}>{opening ? 'Opening...' : 'Open'}</Text>
-              </TouchableOpacity>
+              <Animatable.View animation={opening ? 'zoomOut' : undefined} duration={500}>
+                <TouchableOpacity onPress={openPack} style={styles.openButton} disabled={opening}>
+                  <Text style={styles.openButtonText}>{opening ? 'Opening...' : 'Open'}</Text>
+                </TouchableOpacity>
+              </Animatable.View>
             </View>
           )
         )}
-
         {showCards && cards.length > 0 && renderCard()}
       </View>
     </View>
