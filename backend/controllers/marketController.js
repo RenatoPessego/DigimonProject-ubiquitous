@@ -2,6 +2,7 @@
 const MarketListing = require('../models/MarketListing');
 const User = require('../models/User');
 const Message = require('../models/Message');
+const sendPushNotification = require('../utils/sendPushNotification');
 
 // Colocar carta à venda
 exports.sellCard = async (req, res) => {
@@ -69,6 +70,11 @@ exports.buyCard = async (req, res) => {
 
   await buyer.save();
   await seller.save();
+  await sendPushNotification(
+    seller.pushToken,
+    '💰 Your card was sold!',
+    `You earned ${listing.price} 🪙 from your sale.`
+  );
 
   // Remover anúncio
   await Message.deleteMany({ listingId: listing._id });

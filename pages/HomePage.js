@@ -8,10 +8,13 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import usePushNotifications from '../components/usePushNotifications';
 import { API_URL } from '../config';
 import NavBar from '../components/NavBar';
 
 export default function HomePage() {
+  console.log('HomePage');
+  usePushNotifications();
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);

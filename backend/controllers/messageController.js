@@ -1,5 +1,7 @@
 const Message = require('../models/Message');
 const mongoose = require('mongoose');
+const User = require('../models/User');
+const sendPushNotification = require('../utils/sendPushNotification');
 
 // POST /messages → Enviar mensagem
 exports.sendMessage = async (req, res) => {
@@ -19,6 +21,14 @@ exports.sendMessage = async (req, res) => {
     });
 
     await message.save();
+    const receiver = await User.findById(receiverId);
+    if (receiver?.pushToken) {
+      await sendPushNotification(
+        receiver.pushToken,
+        '📩 New message received',
+        text.length > 40 ? text.slice(0, 40) + '...' : text
+      );
+    }
     res.status(201).json({ message: 'Message sent', data: message });
   } catch (err) {
     console.error('❌ Error sending message:', err);

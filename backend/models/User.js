@@ -5,7 +5,7 @@ const cardSchema = new mongoose.Schema({
   id: { type: String, required: true },
   quantity: { type: Number, default: 1 },
   rarity: { type: String },
-  pack: { type: String },   
+  pack: { type: String },
 });
 
 const userSchema = new mongoose.Schema({
@@ -17,6 +17,13 @@ const userSchema = new mongoose.Schema({
   balance: { type: Number, default: 0 },
   profileImage: String,
   cards: [cardSchema],
+  pushToken: { type: String },
+  checkInHistory: [
+  {
+    location: String,
+    date: Date
+  }
+],
 });
 
 module.exports = mongoose.model('User', userSchema);

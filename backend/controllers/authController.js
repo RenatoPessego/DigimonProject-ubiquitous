@@ -13,6 +13,7 @@ function checkPasswordRequirements(password) {
   return null;
 }
 
+
 exports.register = async (req, res) => {
   const { name, username, email, password, confirmPassword, profileImage, birthDate } = req.body;
 

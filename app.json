@@ -2,6 +2,7 @@
   "expo": {
     "name": "DigimonProject",
     "slug": "DigimonProject",
+    "projectId": "DigimonProject",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,6 +24,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1b77b191-fca0-454f-9a27-1c8fea7590dd"
+      }
+    },
+    "owner": "renatopessego"
   }
 }

@@ -9,7 +9,7 @@ require('./config/passport')(passport);
 const packRoutes = require('./routes/packs');
 const marketRoutes = require('./routes/market');
 const messageRoutes = require('./routes/message');
-
+const userRoutes = require('./routes/user');
 
 
 const path = require('path');
@@ -38,6 +38,7 @@ app.use('/packs', packRoutes);
 app.use('/market', marketRoutes);
 app.use('/messages', messageRoutes);
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use('/user', userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

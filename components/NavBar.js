@@ -55,6 +55,11 @@ export default function NavBar() {
           <Text style={NavBarStyles.marketText}>Market</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => navigation.navigate('NearbyLocation')}>
+          <Text style={NavBarStyles.marketText}>Check-In</Text>
+        </TouchableOpacity>
+
+
         {/* Center - Logo */}
         <TouchableOpacity onPress={() => navigation.navigate('Home')}>
           <Image source={require('../assets/logo.png')} style={NavBarStyles.logo} />

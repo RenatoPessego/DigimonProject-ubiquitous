@@ -13,6 +13,7 @@ import SellCardPage from '../pages/SellCardPage';
 import MyListingsPage from '../pages/MyListingsPage';
 import ChatPage from '../pages/ChatPage';
 import ChatUserListPage from '../pages/ChatUserListPage';
+import NearbyLocationBonus from '../pages/NearbyLocationBonus';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,7 @@ export default function AppNavigator() {
         <Stack.Screen name="MyListings" component={MyListingsPage} />
         <Stack.Screen name="Chat" component={ChatPage} />
         <Stack.Screen name="ChatUserList" component={ChatUserListPage} />
+        <Stack.Screen name="NearbyLocation" component={NearbyLocationBonus} />
       </Stack.Navigator>
     </NavigationContainer>
   );
