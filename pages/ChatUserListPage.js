@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../components/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -70,24 +71,26 @@ export default function ChatUserListPage() {
   );
 
   return (
-    <View style={styles.container}>
-      <NavBar />
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>← Back to My Listings</Text>
-      </TouchableOpacity>
-      <Text style={styles.title}>👥 Conversations</Text>
-      {loading ? (
-        <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />
-      ) : participants.length === 0 ? (
-        <Text style={styles.noCardsText}>No messages for this listing yet.</Text>
-      ) : (
-        <FlatList
-          data={participants}
-          renderItem={renderItem}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.cardList}
-        />
-      )}
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
+      <View style={styles.container}>
+        <NavBar />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>← Back to My Listings</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>👥 Conversations</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />
+        ) : participants.length === 0 ? (
+          <Text style={styles.noCardsText}>No messages for this listing yet.</Text>
+        ) : (
+          <FlatList
+            data={participants}
+            renderItem={renderItem}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.cardList}
+          />
+        )}
+      </View>
+    </SafeAreaView>
   );
 }

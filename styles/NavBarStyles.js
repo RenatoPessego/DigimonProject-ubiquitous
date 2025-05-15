@@ -19,7 +19,6 @@ export const getNavBarStyles = (isPortrait, darkMode = false) =>
     marketText: {
       color: '#fff',
       fontWeight: 'bold',
-      fontSize: isPortrait ? 18 : 20,
     },
 
     // App logo in the center

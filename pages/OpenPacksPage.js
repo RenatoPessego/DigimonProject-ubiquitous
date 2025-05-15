@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../components/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -9,8 +10,9 @@ import {
   Alert,
   useWindowDimensions,
   ScrollView,
+  Modal,
+  FlatList,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 import { getOpenPacksStyles } from '../styles/openPacksStyles';
@@ -29,6 +31,7 @@ export default function OpenPacksPage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showCards, setShowCards] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [modalVisible, setModalVisible] = useState(null);
 
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
@@ -151,97 +154,106 @@ export default function OpenPacksPage() {
     );
   };
 
-  return (
-    <View style={styles.container}>
-      <NavBar />
-      <View style={{ flex: 1, flexDirection: isPortrait ? 'column' : 'row', padding: 16 }}>
-        {/* Filters */}
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingRight: isPortrait ? 0 : 20 }}
-          showsVerticalScrollIndicator={false}
+  const renderCustomDropdown = (label, options, selectedValue, onChange, type) => (
+    <>
+      <Text style={styles.label}>{label}</Text>
+      <TouchableOpacity
+        onPress={() => setModalVisible(type)}
+        style={styles.pickerContainer}
+      >
+        <Text style={{ color: darkMode ? '#fff' : '#000', padding: 15, fontSize: 16 }}>{String(selectedValue).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Text>
+      </TouchableOpacity>
+      <Modal visible={modalVisible === type} transparent animationType="fade">
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 30 }}
+          onPress={() => setModalVisible(null)}
+          activeOpacity={1}
         >
-          <Text style={styles.title}>🧪 Select Pack Filters</Text>
-
-          {/* Rarity and Cards side by side with labels */}
-<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-  <View style={{ flex: 1, marginRight: 4 }}>
-    <Text style={styles.label}>Rarity</Text>
-    <View style={styles.pickerContainer}>
-      <Picker selectedValue={rarity} onValueChange={setRarity} style={styles.picker}>
-        {rarityOptions.map(r => (
-          <Picker.Item key={r} label={r.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} value={r} />
-        ))}
-      </Picker>
-    </View>
-  </View>
-  <View style={{ flex: 1, marginLeft: 4 }}>
-    <Text style={styles.label}>Cards</Text>
-    <View style={styles.pickerContainer}>
-      <Picker selectedValue={cardCount} onValueChange={setCardCount} style={styles.picker}>
-        {cardCountOptions.map(n => (
-          <Picker.Item key={n} label={`${n}`} value={n} />
-        ))}
-      </Picker>
-    </View>
-  </View>
-</View>
-
-
-          <Text style={styles.label}>Pack</Text>
-          <View style={styles.pickerContainer}>
-            <Picker selectedValue={packSource} onValueChange={setPackSource} style={styles.picker}>
-              {setList.map(name => (
-                <Picker.Item key={name} label={name} value={name} />
-              ))}
-            </Picker>
+          <View style={{ backgroundColor: darkMode ? '#222' : '#fff', borderRadius: 10, padding: 20 }}>
+            <FlatList
+              data={options}
+              keyExtractor={(item) => item.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => {
+                    onChange(item);
+                    setModalVisible(null);
+                  }}
+                  style={{ paddingVertical: 12 }}
+                >
+                  <Text style={{ fontSize: 16, color: darkMode ? '#fff' : '#000' }}>{item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Text>
+                </TouchableOpacity>
+              )}
+            />
           </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
 
-          <TouchableOpacity onPress={generatePack} style={[styles.generateButton, { alignSelf: 'stretch', marginTop: 16 }]}>
-            <Text style={styles.generateButtonText}>Generate</Text>
-          </TouchableOpacity>
-        </ScrollView>
-
-        {/* Pack Display */}
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          {loading ? (
-            <ActivityIndicator size="large" color="#2894B0" style={styles.loadingIndicator} />
-          ) : (
-            pack && (
-              <View style={[styles.largePack, { justifyContent: 'center', alignItems: 'center' }]}>
-                <Animatable.Image
-                  animation={opening ? 'flipOutY' : 'pulse'}
-                  duration={opening ? 500 : 2000}
-                  iterationCount={opening ? 1 : 'infinite'}
-                  easing="ease-in-out"
-                  source={require('../assets/Pack.png')}
-                  style={[styles.packImage, { maxHeight: isPortrait ? 220 : 180 }]}
-                />
-                <Text style={styles.packTitle}>{pack.name}</Text>
-                <Text style={styles.packPrice}>{pack.price} 🪙</Text>
-                <Animatable.View animation={opening ? 'zoomOut' : undefined} duration={500}>
-                  <TouchableOpacity onPress={openPack} style={[styles.openButton, { marginTop: 10 }]} disabled={opening}>
-                    <Text style={styles.openButtonText}>{opening ? 'Opening...' : 'Open'}</Text>
-                  </TouchableOpacity>
-                </Animatable.View>
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
+      <View style={styles.container}>
+        <NavBar />
+        <View style={{ flex: 1, flexDirection: isPortrait ? 'column' : 'row', padding: 16 }}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingRight: isPortrait ? 0 : 20 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.title}>🧪 Select Pack Filters</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ flex: 1, marginRight: 4 }}>
+                {renderCustomDropdown('Rarity', rarityOptions, rarity, setRarity, 'rarity')}
               </View>
-            )
-          )}
+              <View style={{ flex: 1, marginLeft: 4 }}>
+                {renderCustomDropdown('Cards', cardCountOptions, cardCount, setCardCount, 'count')}
+              </View>
+            </View>
+            {renderCustomDropdown('Pack', setList, packSource, setPackSource, 'pack')}
+            <TouchableOpacity onPress={generatePack} style={[styles.generateButton, { alignSelf: 'stretch', marginTop: 16 }]}>
+              <Text style={styles.generateButtonText}>Generate</Text>
+            </TouchableOpacity>
+          </ScrollView>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            {loading ? (
+              <ActivityIndicator size="large" color="#2894B0" style={styles.loadingIndicator} />
+            ) : (
+              pack && (
+                <View style={[styles.largePack, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <Animatable.Image
+                    animation={opening ? 'flipOutY' : 'pulse'}
+                    duration={opening ? 500 : 2000}
+                    iterationCount={opening ? 1 : 'infinite'}
+                    easing="ease-in-out"
+                    source={require('../assets/Pack.png')}
+                    style={[styles.packImage, { maxHeight: isPortrait ? 220 : 180 }]}
+                  />
+                  <Text style={styles.packTitle}>{pack.name}</Text>
+                  <Text style={styles.packPrice}>{pack.price} 🪙</Text>
+                  <Animatable.View animation={opening ? 'zoomOut' : undefined} duration={500}>
+                    <TouchableOpacity onPress={openPack} style={[styles.openButton, { marginTop: 10 }]} disabled={opening}>
+                      <Text style={styles.openButtonText}>{opening ? 'Opening...' : 'Open'}</Text>
+                    </TouchableOpacity>
+                  </Animatable.View>
+                </View>
+              )
+            )}
+          </View>
         </View>
+        {showCards && cards.length > 0 && (
+          <View style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#00000055',
+            zIndex: 999
+          }}>
+            {renderCard()}
+          </View>
+        )}
       </View>
-
-      {showCards && cards.length > 0 && (
-        <View style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#00000055',
-          zIndex: 999
-        }}>
-          {renderCard()}
-        </View>
-      )}
-    </View>
+    </SafeAreaView>
   );
 }

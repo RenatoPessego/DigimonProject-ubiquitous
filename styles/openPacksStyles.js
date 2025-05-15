@@ -50,6 +50,7 @@ export const getOpenPacksStyles = (isPortrait, darkMode = false) => {
       height: 60,
       width: '100%',
       color: darkMode ? '#fff' : '#333',
+      
       fontSize: 16,
       paddingVertical: 12,
       justifyContent: 'center',
@@ -213,5 +214,6 @@ export const getOpenPacksStyles = (isPortrait, darkMode = false) => {
       height: 0,
       position: 'absolute',
     },
+    
   });
 };

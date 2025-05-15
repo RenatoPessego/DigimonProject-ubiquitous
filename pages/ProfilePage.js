@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../components/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -265,131 +266,132 @@ export default function ProfilePage() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
-      <NavBar />
-      <FlatList
-        contentContainerStyle={styles.container}
-        ListHeaderComponent={
+    <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
+  <View style={{ flex: 1 }}>
+    <NavBar />
+    <FlatList
+      contentContainerStyle={styles.container}
+      ListHeaderComponent={
+        <>
+          <Image
+            source={user.profileImage?.startsWith('data') ? { uri: user.profileImage } : require('../assets/profile-placeholder.png')}
+            style={styles.avatar}
+          />
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.username}>@{user.username}</Text>
+          <Text style={styles.email}>{user.email}</Text>
+          <Text style={styles.birthDate}>Birth: {new Date(user.birthDate).toLocaleDateString()}</Text>
+          <Text style={styles.balance}>Balance: {user.balance.toFixed(2)} 🪙</Text>
+          {cardsInfo.length > 0 && <Text style={styles.sectionTitle}>Your Cards</Text>}
+        </>
+      }
+      data={cardsInfo}
+      keyExtractor={(item) => item.id}
+      renderItem={renderCard}
+      numColumns={3}
+      ListFooterComponent={
+        cardsInfo.length > 0 ? (
+          <View style={styles.paginationContainer}>
+            <TouchableOpacity disabled={currentPage === 1} onPress={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>
+              <Text style={styles.pageButton}>◀</Text>
+            </TouchableOpacity>
+            <Text style={styles.pageNumber}>{currentPage} / {totalPages}</Text>
+            <TouchableOpacity disabled={currentPage === totalPages} onPress={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>
+              <Text style={styles.pageButton}>▶</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null
+      }
+    />
+
+    {/* Card Modal */}
+    <Modal visible={modalVisible} animationType="fade" transparent>
+      <View style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: darkMode ? '#111' : '#ffffff',
+        zIndex: 999,
+        justifyContent: 'flex-start',
+      }}>
+        {selectedCard && (
           <>
-            <Image
-              source={user.profileImage?.startsWith('data') ? { uri: user.profileImage } : require('../assets/profile-placeholder.png')}
-              style={styles.avatar}
-            />
-            <Text style={styles.name}>{user.name}</Text>
-            <Text style={styles.username}>@{user.username}</Text>
-            <Text style={styles.email}>{user.email}</Text>
-            <Text style={styles.birthDate}>Birth: {new Date(user.birthDate).toLocaleDateString()}</Text>
-            <Text style={styles.balance}>Balance: {user.balance.toFixed(2)} 🪙</Text>
-            {cardsInfo.length > 0 && <Text style={styles.sectionTitle}>Your Cards</Text>}
-          </>
-        }
-        data={cardsInfo}
-        keyExtractor={(item) => item.id}
-        renderItem={renderCard}
-        numColumns={3}
-        ListFooterComponent={
-          cardsInfo.length > 0 ? (
-            <View style={styles.paginationContainer}>
-              <TouchableOpacity disabled={currentPage === 1} onPress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}>
-                <Text style={styles.pageButton}>◀</Text>
-              </TouchableOpacity>
-              <Text style={styles.pageNumber}>{currentPage} / {totalPages}</Text>
-              <TouchableOpacity disabled={currentPage === totalPages} onPress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}>
-                <Text style={styles.pageButton}>▶</Text>
-              </TouchableOpacity>
-            </View>
-          ) : null
-        }
-      />
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={{
+                position: 'absolute',
+                top: 20,
+                right: 20,
+                zIndex: 10,
+                padding: 5,
+              }}
+            >
+              <Text style={{ fontSize: 28, color: darkMode ? '#eee' : '#444' }}>✖</Text>
+            </TouchableOpacity>
 
-      <Modal visible={modalVisible} animationType="fade" transparent>
-        <View style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: darkMode ? '#111' : '#ffffff',
-          zIndex: 999,
-          justifyContent: 'flex-start',
-        }}>
-          {selectedCard && (
-            <>
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={{
-                  position: 'absolute',
-                  top: 20,
-                  right: 20,
-                  zIndex: 10,
-                  padding: 5,
-                }}
-              >
-                <Text style={{ fontSize: 28, color: darkMode ? '#eee' : '#444' }}>✖</Text>
-              </TouchableOpacity>
-
-              <View style={{
-                flexDirection: isPortrait ? 'column' : 'row',
-                alignItems: 'center',
-                allignCOntent: 'center',
-                paddingHorizontal: 20,
-                paddingTop: 30,
-                paddingBottom: 20,
-                flex: 1,
-              }}>
-                <View style={{ alignItems: 'center', alignContent: 'center', flex: isPortrait ? undefined : 0 }}>
-                  <View style={{ width: '100%', alignItems: 'center' }}>
-  <Text style={{
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-    color: darkMode ? '#fff' : '#000',
-  }}>
-    {selectedCard.name}
-  </Text>
-</View>
-
-                  <Animatable.Image
-                    animation="zoomIn"
-                    duration={600}
-                    easing="ease-out"
-                    source={selectedCard.image_url ? { uri: selectedCard.image_url } : require('../assets/not-found-card.png')}
-                    style={{
-                      width: isPortrait ? width * 0.6 : width * 0.4,
-                      height: isPortrait ? height * 0.45 : height * 0.55,
-                      resizeMode: 'contain',
-                      marginBottom: isPortrait ? 10 : 0,
-                      marginRight: isPortrait ? 0 : 20,
-                      
-                    }}
-                  />
+            <View style={{
+              flexDirection: isPortrait ? 'column' : 'row',
+              alignItems: 'center',
+              alignContent: 'center',
+              paddingHorizontal: 20,
+              paddingTop: 30,
+              paddingBottom: 20,
+              flex: 1,
+            }}>
+              <View style={{ alignItems: 'center', flex: isPortrait ? undefined : 0 }}>
+                <View style={{ width: '100%', alignItems: 'center' }}>
+                  <Text style={{
+                    fontSize: 22,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    marginBottom: 10,
+                    color: darkMode ? '#fff' : '#000',
+                  }}>
+                    {selectedCard.name}
+                  </Text>
                 </View>
 
-                <View style={{ flex: 1, justifyContent: 'flex-start' }}>
-                  <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Type:</Text> {selectedCard.type}</Text>
-                  <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Race:</Text> {selectedCard.race}</Text>
-                  <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Level:</Text> {selectedCard.level}</Text>
-                  <Text style={styles.modalText}><Text style={styles.modalSubtitle}>ATK/DEF:</Text> {selectedCard.atk}/{selectedCard.def}</Text>
-                  <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Rarity:</Text> {selectedCard.rarity}</Text>
-                  <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Price:</Text> {selectedCard.price} 🪙</Text>
-                  <Text style={styles.modalDesc}>{selectedCard.desc}</Text>
+                <Animatable.Image
+                  animation="zoomIn"
+                  duration={600}
+                  easing="ease-out"
+                  source={selectedCard.image_url ? { uri: selectedCard.image_url } : require('../assets/not-found-card.png')}
+                  style={{
+                    width: isPortrait ? width * 0.6 : width * 0.4,
+                    height: isPortrait ? height * 0.45 : height * 0.55,
+                    resizeMode: 'contain',
+                    marginBottom: isPortrait ? 10 : 0,
+                    marginRight: isPortrait ? 0 : 20,
+                  }}
+                />
+              </View>
 
-                  <View style={{
-                    flexDirection: 'row',
-                    marginTop: 20,
-                    justifyContent: 'center',
-                  }}>
-                    <TouchableOpacity style={[styles.quickSellButton, { marginRight: 10 }]} onPress={handleQuickSell}>
-                      <Text style={styles.quickSellButtonText}>Quick Sell</Text>
-                    </TouchableOpacity>
-                  </View>
+              <View style={{ flex: 1, justifyContent: 'flex-start' }}>
+                <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Type:</Text> {selectedCard.type}</Text>
+                <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Race:</Text> {selectedCard.race}</Text>
+                <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Level:</Text> {selectedCard.level}</Text>
+                <Text style={styles.modalText}><Text style={styles.modalSubtitle}>ATK/DEF:</Text> {selectedCard.atk}/{selectedCard.def}</Text>
+                <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Rarity:</Text> {selectedCard.rarity}</Text>
+                <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Pack:</Text> {selectedCard.packSource}</Text>
+                <Text style={styles.modalText}><Text style={styles.modalSubtitle}>Price:</Text> {selectedCard.price} 🪙</Text>
+                <Text style={styles.modalDesc}>{selectedCard.desc}</Text>
+
+                <View style={{
+                  flexDirection: 'row',
+                  marginTop: 20,
+                  justifyContent: 'center',
+                }}>
+                  <TouchableOpacity style={[styles.quickSellButton, { marginRight: 10 }]} onPress={handleQuickSell}>
+                    <Text style={styles.quickSellButtonText}>Quick Sell</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            </>
-          )}
-        </View>
-      </Modal>
-    </View>
+            </View>
+          </>
+        )}
+      </View>
+    </Modal>
+  </View>
+</SafeAreaView>
+
   );
 }

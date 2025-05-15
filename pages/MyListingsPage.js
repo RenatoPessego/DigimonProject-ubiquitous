@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../components/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -142,54 +143,57 @@ export default function MyListingsPage() {
   );
 
   return (
-    <View style={styles.container}>
-      <NavBar />
-      <Text style={styles.title}>📦 My Listings</Text>
-      {loading ? (
-        <ActivityIndicator size="large" color="#2894B0" style={styles.activityIndicator} />
-      ) : listings.length === 0 ? (
-        <Text style={styles.noCardsText}>You have no active listings.</Text>
-      ) : (
-        <FlatList
-          data={listings}
-          renderItem={renderItem}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.cardList}
-        />
-      )}
+    <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
+      <View style={styles.container}>
+        <NavBar />
+        <Text style={styles.title}>📦 My Listings</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#2894B0" style={styles.activityIndicator} />
+        ) : listings.length === 0 ? (
+          <Text style={styles.noCardsText}>You have no active listings.</Text>
+        ) : (
+          <FlatList
+            data={listings}
+            renderItem={renderItem}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.cardList}
+          />
+        )}
 
-      {/* Modal to Edit Price */}
-      <Modal visible={editVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Price</Text>
-            <Text style={styles.cardText}>
-              New price for listing: "{selectedListing?.cardId}"
-            </Text>
-            <TextInput
-              value={newPrice}
-              onChangeText={setNewPrice}
-              keyboardType="numeric"
-              placeholder="Ex: 5.00"
-              style={styles.priceInput}
-            />
-            <View style={styles.editActionsRow}>
-              <TouchableOpacity
-                onPress={() => setEditVisible(false)}
-                style={[styles.modalButton, { backgroundColor: '#999' }]}
-              >
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleUpdate}
-                style={[styles.modalButton, { backgroundColor: '#2894B0' }]}
-              >
-                <Text style={styles.modalButtonText}>Confirm</Text>
-              </TouchableOpacity>
+        {/* Modal to Edit Price */}
+        <Modal visible={editVisible} transparent animationType="fade">
+          <View style={[styles.modalOverlay, { backgroundColor: darkMode ? '#000000aa' : '#ffffffdd' }]}>
+            <View style={[styles.modalContent, { backgroundColor: darkMode ? '#222' : '#fff' }]}>
+              <Text style={[styles.modalTitle, { color: darkMode ? '#fff' : '#000' }]}>Edit Price</Text>
+              <Text style={[styles.cardText, { color: darkMode ? '#ccc' : '#333' }]}>
+                New price for listing: "{selectedListing?.cardId}"
+              </Text>
+              <TextInput
+                value={newPrice}
+                onChangeText={setNewPrice}
+                keyboardType="numeric"
+                placeholder="Ex: 5.00"
+                placeholderTextColor={darkMode ? '#888' : '#999'}
+                style={[styles.priceInput, { color: darkMode ? '#fff' : '#000', borderColor: darkMode ? '#555' : '#ccc' }]}
+              />
+              <View style={styles.editActionsRow}>
+                <TouchableOpacity
+                  onPress={() => setEditVisible(false)}
+                  style={[styles.modalButton, { backgroundColor: '#999' }]}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleUpdate}
+                  style={[styles.modalButton, { backgroundColor: '#2894B0' }]}
+                >
+                  <Text style={styles.modalButtonText}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../components/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -107,25 +108,27 @@ export default function MarketPage() {
   );
 
   return (
-    <View style={styles.container}>
-      <NavBar />
-      <Text style={styles.title}>🛒 Market</Text>
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="#2894B0"
-          style={styles.activityIndicator}
-        />
-      ) : listings.length === 0 ? (
-        <Text style={styles.noCardsText}>No cards for sale.</Text>
-      ) : (
-        <FlatList
-          data={listings}
-          renderItem={renderItem}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.cardList}
-        />
-      )}
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
+      <View style={styles.container}>
+        <NavBar />
+        <Text style={styles.title}>🛒 Market</Text>
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color="#2894B0"
+            style={styles.activityIndicator}
+          />
+        ) : listings.length === 0 ? (
+          <Text style={styles.noCardsText}>No cards for sale.</Text>
+        ) : (
+          <FlatList
+            data={listings}
+            renderItem={renderItem}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.cardList}
+          />
+        )}
+      </View>
+    </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../components/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -16,11 +17,11 @@ import NavBar from '../components/NavBar';
 import { getHomeStyles } from '../styles/homeStyles';
 
 export default function HomePage() {
-  console.log('HomePage');
   usePushNotifications();
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
   const { darkMode } = useTheme();
@@ -73,20 +74,22 @@ export default function HomePage() {
   }
 
   return (
-    <View style={styles.container}>
-      <NavBar />
+    <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
+      <View style={styles.container}>
+        <NavBar />
 
-      <View style={styles.contentContainer}>
-        <Text style={styles.welcomeText}>Welcome, {user.email}!</Text>
-        <Text style={styles.subText}>You are logged in.</Text>
+        <View style={styles.contentContainer}>
+          <Text style={styles.welcomeText}>Welcome, {user.email}!</Text>
+          <Text style={styles.subText}>You are logged in.</Text>
 
-        <TouchableOpacity
-          style={styles.openPackButton}
-          onPress={() => navigation.navigate('OpenPacks')}
-        >
-          <Text style={styles.openPackButtonText}>🎁 Open Packs</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.openPackButton}
+            onPress={() => navigation.navigate('OpenPacks')}
+          >
+            <Text style={styles.openPackButtonText}>🎁 Open Packs</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

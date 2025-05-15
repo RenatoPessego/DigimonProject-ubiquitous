@@ -15,12 +15,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { getRegisterStyles } from '../styles/registerStyles';
 import { API_URL } from '../config';
+import { useTheme } from '../components/ThemeContext';
 
 export default function RegisterPage() {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const registerStyles = getRegisterStyles(isPortrait);
+  const { darkMode } = useTheme();
+  const registerStyles = getRegisterStyles(isPortrait, darkMode);
 
   const [form, setForm] = useState({
     name: '',
@@ -128,11 +130,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <View style={registerStyles.container}>
+    <View style={[registerStyles.container, { backgroundColor: darkMode ? '#111' : '#fff' }]}>
       <Text style={registerStyles.title}>Create Account</Text>
 
       <TextInput
         placeholder="Name"
+        placeholderTextColor={darkMode ? '#aaa' : '#666'}
         style={registerStyles.input}
         value={form.name}
         onChangeText={(text) => setForm({ ...form, name: text })}
@@ -140,6 +143,7 @@ export default function RegisterPage() {
 
       <TextInput
         placeholder="Username"
+        placeholderTextColor={darkMode ? '#aaa' : '#666'}
         style={registerStyles.input}
         value={form.username}
         onChangeText={(text) => setForm({ ...form, username: text })}
@@ -147,6 +151,7 @@ export default function RegisterPage() {
 
       <TextInput
         placeholder="Email"
+        placeholderTextColor={darkMode ? '#aaa' : '#666'}
         style={registerStyles.input}
         value={form.email}
         onChangeText={(text) => setForm({ ...form, email: text })}
@@ -155,6 +160,7 @@ export default function RegisterPage() {
 
       <TextInput
         placeholder="Password"
+        placeholderTextColor={darkMode ? '#aaa' : '#666'}
         style={registerStyles.input}
         secureTextEntry
         value={form.password}
@@ -163,6 +169,7 @@ export default function RegisterPage() {
 
       <TextInput
         placeholder="Confirm Password"
+        placeholderTextColor={darkMode ? '#aaa' : '#666'}
         style={registerStyles.input}
         secureTextEntry
         value={form.confirmPassword}
@@ -170,7 +177,7 @@ export default function RegisterPage() {
       />
 
       <TouchableOpacity onPress={() => setShowDatePicker(true)} style={registerStyles.input}>
-        <Text>
+        <Text style={{ color: darkMode ? '#fff' : '#000' }}>
           Birth Date: {form.birthDate.toISOString().split('T')[0]}
         </Text>
       </TouchableOpacity>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../components/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -10,9 +11,10 @@ import {
 } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../config';
 import { getMarketStyles } from '../styles/marketStyles';
-import { useNavigation } from '@react-navigation/native';
+import NavBar from '../components/NavBar';
 
 const TCG_LOCATIONS = [
   { name: 'Lisbon', lat: 38.7369, lng: -9.1399, radius: 6.0 },
@@ -42,14 +44,15 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 export default function NearbyLocationBonus() {
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const styles = getMarketStyles(isPortrait);
+  const { darkMode } = useTheme();
+  const styles = getMarketStyles(isPortrait, darkMode);
+  const navigation = useNavigation();
 
   const [location, setLocation] = useState(null);
   const [nearbyStore, setNearbyStore] = useState(null);
   const [rewardMessage, setRewardMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [claimed, setClaimed] = useState(false);
-  const navigation = useNavigation();
 
   useEffect(() => {
     detectLocation();
@@ -107,38 +110,37 @@ export default function NearbyLocationBonus() {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backButton}>
-        <Text style={styles.backButtonText}>← Back to Home</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
+      <View style={styles.container}>
+        <NavBar />
+        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backButton}>
+          <Text style={styles.backButtonText}>← Back to Home</Text>
+        </TouchableOpacity>
 
-      <Text style={styles.title}>📍 Location Check-In</Text>
+        <Text style={styles.title}>📍 Location Check-In</Text>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />
-      ) : nearbyStore ? (
-        <>
-          <Text style={styles.cardText}>
-            🎯 You’re near {nearbyStore}!
-          </Text>
-          <TouchableOpacity
-            onPress={claimBonus}
-            style={[styles.buyButton, claimed && { backgroundColor: '#aaa' }]}
-            disabled={claimed}
-          >
-            <Text style={styles.buyButtonText}>
-              {claimed ? '✔️ Bonus claimed' : '🎁 Claim your bonus'}
-            </Text>
-          </TouchableOpacity>
-          {rewardMessage !== '' && (
-            <Text style={[styles.cardText, { marginTop: 15 }]}>{rewardMessage}</Text>
-          )}
-        </>
-      ) : (
-        <Text style={styles.cardText}>
-          ℹ️ You’re not near any known TCG store.
-        </Text>
-      )}
-    </View>
+        {loading ? (
+          <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />
+        ) : nearbyStore ? (
+          <>
+            <Text style={styles.cardText}>🎯 You’re near {nearbyStore}!</Text>
+            <TouchableOpacity
+              onPress={claimBonus}
+              style={[styles.buyButton, claimed && { backgroundColor: '#aaa' }]}
+              disabled={claimed}
+            >
+              <Text style={styles.buyButtonText}>
+                {claimed ? '✔️ Bonus claimed' : '🎁 Claim your bonus'}
+              </Text>
+            </TouchableOpacity>
+            {rewardMessage !== '' && (
+              <Text style={[styles.cardText, { marginTop: 15 }]}>{rewardMessage}</Text>
+            )}
+          </>
+        ) : (
+          <Text style={styles.cardText}>ℹ️ You’re not near any known TCG store.</Text>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }

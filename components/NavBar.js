@@ -60,13 +60,17 @@ export default function NavBar() {
         {/* Left - Market + Theme */}
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-            <Text style={styles.marketText}>Market</Text>
+            <Text style={styles.marketText}> Market </Text>
           </TouchableOpacity>
 
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
-            <Feather name={darkMode ? 'moon' : 'sun'} size={18} color={darkMode ? '#fff' : '#333'} style={{ marginRight: 5 }} />
-            <Switch value={darkMode} onValueChange={toggleTheme} />
-          </View>
+          <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
+  <Feather
+    name={darkMode ? 'moon' : 'sun'}
+    size={22}
+    color={darkMode ? '#fff' : '#000'}
+  />
+</TouchableOpacity>
+
         </View>
 
         {/* Center - Logo (clickable only on image) */}
@@ -77,6 +81,9 @@ export default function NavBar() {
         </View>
 
         {/* Right - Profile + Cart */}
+        <TouchableOpacity onPress={() => navigation.navigate('NearbyLocation')}>
+          <Text style={styles.marketText}>📍</Text>
+        </TouchableOpacity>
         <View style={styles.leftIcons}>
           <TouchableOpacity onPress={() => setProfileMenuVisible(!profileMenuVisible)}>
             <Image

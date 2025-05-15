@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../components/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -134,6 +135,7 @@ export default function SellCardPage() {
           <TextInput
             style={styles.priceInput}
             placeholder="Set price"
+            placeholderTextColor={darkMode ? '#aaa' : '#666'}
             keyboardType="numeric"
             value={priceMap[key] || ''}
             onChangeText={(text) => setPriceMap({ ...priceMap, [key]: text })}
@@ -147,27 +149,29 @@ export default function SellCardPage() {
   };
 
   return (
-    <View style={styles.container}>
-      <NavBar />
-      <Text style={styles.title}>📤 Sell Cards</Text>
-      <TouchableOpacity
-        style={styles.viewListingsButton}
-        onPress={() => navigation.navigate('MyListings')}
-      >
-        <Text style={styles.viewListingsText}>View My Listings</Text>
-      </TouchableOpacity>
-      {loading ? (
-        <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />
-      ) : myCards.length === 0 ? (
-        <Text style={styles.noCardsText}>You have no cards to sell.</Text>
-      ) : (
-        <FlatList
-          data={myCards}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => `${item.id}_${index}`}
-          contentContainerStyle={styles.cardList}
-        />
-      )}
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
+      <View style={styles.container}>
+        <NavBar />
+        <Text style={styles.title}>📤 Sell Cards</Text>
+        <TouchableOpacity
+          style={styles.viewListingsButton}
+          onPress={() => navigation.navigate('MyListings')}
+        >
+          <Text style={styles.viewListingsText}>View My Listings</Text>
+        </TouchableOpacity>
+        {loading ? (
+          <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />
+        ) : myCards.length === 0 ? (
+          <Text style={styles.noCardsText}>You have no cards to sell.</Text>
+        ) : (
+          <FlatList
+            data={myCards}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => `${item.id}_${index}`}
+            contentContainerStyle={styles.cardList}
+          />
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
