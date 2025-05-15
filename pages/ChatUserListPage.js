@@ -5,18 +5,24 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Alert
+  Alert,
+  useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { API_URL } from '../config';
-import { marketStyles as styles } from '../styles/marketStyles';
+import { getMarketStyles } from '../styles/marketStyles';
 import NavBar from '../components/NavBar';
 
 export default function ChatUserListPage() {
   const navigation = useNavigation();
   const route = useRoute();
   const { listingId } = route.params;
+
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const styles = getMarketStyles(isPortrait);
+
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,7 +57,7 @@ export default function ChatUserListPage() {
             navigation.navigate('Chat', {
               listingId,
               receiverId: item._id,
-              backTo: 'ChatUserList' // usado para voltar corretamente
+              backTo: 'ChatUserList'
             })
           }
         >
@@ -64,8 +70,8 @@ export default function ChatUserListPage() {
   return (
     <View style={styles.container}>
       <NavBar />
-      <TouchableOpacity onPress={() => navigation.goBack()} style={{ margin: 10 }}>
-        <Text style={{ color: '#2894B0', fontWeight: 'bold' }}>← Back to My Listings</Text>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back to My Listings</Text>
       </TouchableOpacity>
       <Text style={styles.title}>👥 Conversations</Text>
       {loading ? (

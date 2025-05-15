@@ -7,16 +7,20 @@ import {
   Alert,
   Image,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { registerStyles } from '../styles/registerStyles';
+import { getRegisterStyles } from '../styles/registerStyles';
 import { API_URL } from '../config';
 
 export default function RegisterPage() {
   const navigation = useNavigation();
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const registerStyles = getRegisterStyles(isPortrait);
 
   const [form, setForm] = useState({
     name: '',
@@ -198,10 +202,8 @@ export default function RegisterPage() {
         <Text style={registerStyles.buttonText}>Register</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.replace('Welcome')} style={{ marginTop: 20 }}>
-        <Text style={{ textAlign: 'center', color: '#003A49', fontWeight: 'bold' }}>
-          Back to Welcome Page
-        </Text>
+      <TouchableOpacity onPress={() => navigation.replace('Welcome')} style={registerStyles.backLink}>
+        <Text style={registerStyles.backText}>Back to Welcome Page</Text>
       </TouchableOpacity>
     </View>
   );

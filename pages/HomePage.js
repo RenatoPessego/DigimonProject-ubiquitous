@@ -5,12 +5,14 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import usePushNotifications from '../components/usePushNotifications';
 import { API_URL } from '../config';
 import NavBar from '../components/NavBar';
+import { getHomeStyles } from '../styles/homeStyles';
 
 export default function HomePage() {
   console.log('HomePage');
@@ -18,6 +20,9 @@ export default function HomePage() {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const styles = getHomeStyles(isPortrait);
 
   const fetchUserData = async () => {
     try {
@@ -51,14 +56,7 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#E0F7FA',
-        }}
-      >
+      <View style={styles.loading}>
         <ActivityIndicator size="large" color="#2894B0" />
       </View>
     );
@@ -66,51 +64,25 @@ export default function HomePage() {
 
   if (!user) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#E0F7FA',
-        }}
-      >
+      <View style={styles.notAuth}>
         <Text>You are not logged in.</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#E0F7FA' }}>
+    <View style={styles.container}>
       <NavBar />
 
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 16,
-        }}
-      >
-        <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
-          Welcome, {user.email}!
-        </Text>
-        <Text style={{ fontSize: 16, color: '#666' }}>You are logged in.</Text>
+      <View style={styles.contentContainer}>
+        <Text style={styles.welcomeText}>Welcome, {user.email}!</Text>
+        <Text style={styles.subText}>You are logged in.</Text>
 
         <TouchableOpacity
-          style={{
-            marginTop: 30,
-            backgroundColor: '#2894B0',
-            paddingVertical: 12,
-            paddingHorizontal: 24,
-            borderRadius: 8,
-          }}
+          style={styles.openPackButton}
           onPress={() => navigation.navigate('OpenPacks')}
         >
-          <Text
-            style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}
-          >
-            🎁 Open Packs
-          </Text>
+          <Text style={styles.openPackButtonText}>🎁 Open Packs</Text>
         </TouchableOpacity>
       </View>
     </View>

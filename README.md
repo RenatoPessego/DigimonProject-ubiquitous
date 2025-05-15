@@ -15,3 +15,8 @@ git clone https://github.com/RenatoPessego/DigimonProject-ubiquitous.git
 cd DigimonProject-ubiquitous
 npm install
 npx expo start
+```
+Open a new terminal and do:
+```bash
+cd ./backend
+node server.js

@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Alert,
+  TouchableOpacity,
+  useWindowDimensions,
+} from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
-import { marketStyles as styles } from '../styles/marketStyles';
+import { getMarketStyles } from '../styles/marketStyles';
 import { useNavigation } from '@react-navigation/native';
-
 
 const TCG_LOCATIONS = [
   { name: 'Lisbon', lat: 38.7369, lng: -9.1399, radius: 6.0 },
@@ -26,13 +32,17 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) ** 2;
+    Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
 
 export default function NearbyLocationBonus() {
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const styles = getMarketStyles(isPortrait);
+
   const [location, setLocation] = useState(null);
   const [nearbyStore, setNearbyStore] = useState(null);
   const [rewardMessage, setRewardMessage] = useState('');
@@ -97,9 +107,8 @@ export default function NearbyLocationBonus() {
 
   return (
     <View style={styles.container}>
-      {/* Botão de voltar */}
-      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={{ margin: 10 }}>
-        <Text style={{ color: '#2894B0', fontWeight: 'bold' }}>← Back to Home</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back to Home</Text>
       </TouchableOpacity>
 
       <Text style={styles.title}>📍 Location Check-In</Text>
@@ -113,15 +122,10 @@ export default function NearbyLocationBonus() {
           </Text>
           <TouchableOpacity
             onPress={claimBonus}
-            style={{
-              backgroundColor: claimed ? '#aaa' : '#2894B0',
-              padding: 12,
-              marginTop: 20,
-              borderRadius: 8
-            }}
+            style={[styles.buyButton, claimed && { backgroundColor: '#aaa' }]}
             disabled={claimed}
           >
-            <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center' }}>
+            <Text style={styles.buyButtonText}>
               {claimed ? '✔️ Bonus claimed' : '🎁 Claim your bonus'}
             </Text>
           </TouchableOpacity>

@@ -8,12 +8,13 @@ import {
   Alert,
   Modal,
   TextInput,
-  ActivityIndicator
+  ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../config';
-import { marketStyles as styles } from '../styles/marketStyles';
+import { getMarketStyles } from '../styles/marketStyles';
 import NavBar from '../components/NavBar';
 
 export default function MyListingsPage() {
@@ -23,13 +24,16 @@ export default function MyListingsPage() {
   const [selectedListing, setSelectedListing] = useState(null);
   const [newPrice, setNewPrice] = useState('');
   const navigation = useNavigation();
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const styles = getMarketStyles(isPortrait);
 
   const fetchListings = async () => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem('authToken');
       const res = await fetch(`${API_URL}/market/mylistings`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
@@ -44,10 +48,9 @@ export default function MyListingsPage() {
   const handleRemove = async (id) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      console.log('🔴 Removing listing:', id);
       const res = await fetch(`${API_URL}/market/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
@@ -71,9 +74,9 @@ export default function MyListingsPage() {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ price })
+        body: JSON.stringify({ price }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
@@ -100,41 +103,36 @@ export default function MyListingsPage() {
         <Text style={styles.cardText}>Rarity: {item.rarity}</Text>
         <Text style={styles.cardText}>Pack: {item.pack}</Text>
         <Text style={styles.cardPrice}>Price: {item.price} 🪙</Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
+
+        <View style={styles.editActionsRow}>
           <TouchableOpacity
-            style={{
-              backgroundColor: '#FFA500',
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              borderRadius: 6,
-            }}
+            style={[styles.modalButton, { backgroundColor: '#FFA500' }]}
             onPress={() => {
               setSelectedListing(item);
               setNewPrice(item.price.toString());
               setEditVisible(true);
             }}
           >
-            <Text style={{ color: 'white', fontWeight: 'bold' }}>Edit</Text>
+            <Text style={styles.modalButtonText}>Edit</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={[styles.buyButton, { backgroundColor: '#666', marginTop: 6 }]}
-            onPress={() => navigation.navigate('ChatUserList', {
-              listingId: item._id,
-              receiverId: item.buyerId || '' // substituímos isto já a seguir
-            })}
+            style={[styles.modalButton, { backgroundColor: '#555' }]}
+            onPress={() =>
+              navigation.navigate('ChatUserList', {
+                listingId: item._id,
+                receiverId: item.buyerId || '',
+              })
+            }
           >
-            <Text style={styles.buyButtonText}>View Chats</Text>
+            <Text style={styles.modalButtonText}>View Chats</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={{
-              backgroundColor: '#B22222',
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              borderRadius: 6,
-            }}
+            style={[styles.modalButton, { backgroundColor: '#B22222' }]}
             onPress={() => handleRemove(item._id)}
           >
-            <Text style={{ color: 'white', fontWeight: 'bold' }}>Remove</Text>
+            <Text style={styles.modalButtonText}>Remove</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -146,7 +144,7 @@ export default function MyListingsPage() {
       <NavBar />
       <Text style={styles.title}>📦 My Listings</Text>
       {loading ? (
-        <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color="#2894B0" style={styles.activityIndicator} />
       ) : listings.length === 0 ? (
         <Text style={styles.noCardsText}>You have no active listings.</Text>
       ) : (
@@ -160,10 +158,10 @@ export default function MyListingsPage() {
 
       {/* Modal to Edit Price */}
       <Modal visible={editVisible} transparent animationType="fade">
-        <View style={[styles.modalOverlay, { zIndex: 999 }]}>
-          <View style={[styles.modalContent, { padding: 20, backgroundColor: 'white', borderRadius: 8 }]}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Edit Price</Text>
-            <Text style={{ marginBottom: 10 }}>
+            <Text style={styles.cardText}>
               New price for listing: "{selectedListing?.cardId}"
             </Text>
             <TextInput
@@ -171,26 +169,20 @@ export default function MyListingsPage() {
               onChangeText={setNewPrice}
               keyboardType="numeric"
               placeholder="Ex: 5.00"
-              style={{
-                borderWidth: 1,
-                borderColor: '#ccc',
-                borderRadius: 6,
-                padding: 10,
-                marginBottom: 15
-              }}
+              style={styles.priceInput}
             />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={styles.editActionsRow}>
               <TouchableOpacity
                 onPress={() => setEditVisible(false)}
-                style={{ backgroundColor: '#999', padding: 10, borderRadius: 6 }}
+                style={[styles.modalButton, { backgroundColor: '#999' }]}
               >
-                <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleUpdate}
-                style={{ backgroundColor: '#2894B0', padding: 10, borderRadius: 6 }}
+                style={[styles.modalButton, { backgroundColor: '#2894B0' }]}
               >
-                <Text style={{ color: 'white', fontWeight: 'bold' }}>Confirm</Text>
+                <Text style={styles.modalButtonText}>Confirm</Text>
               </TouchableOpacity>
             </View>
           </View>

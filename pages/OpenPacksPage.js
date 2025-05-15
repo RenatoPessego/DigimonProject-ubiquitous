@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -7,11 +6,13 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
-import { openPacksStyles as styles } from '../styles/openPacksStyles';
+import { getOpenPacksStyles } from '../styles/openPacksStyles';
 import NavBar from '../components/NavBar';
 import * as Animatable from 'react-native-animatable';
 
@@ -26,8 +27,11 @@ export default function OpenPacksPage() {
   const [cards, setCards] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showCards, setShowCards] = useState(false);
-  const [packOpened, setPackOpened] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const styles = getOpenPacksStyles(isPortrait);
 
   const rarityOptions = ['common', 'rare', 'super_rare', 'legendary'];
   const cardCountOptions = [1, 3, 5, 7, 9];
@@ -62,7 +66,7 @@ export default function OpenPacksPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ rarityType: rarity, cardCount, packSource }),
       });
@@ -79,14 +83,13 @@ export default function OpenPacksPage() {
   const openPack = async () => {
     try {
       setOpening(true);
-      setPackOpened(false);
       setTimeout(async () => {
         const token = await AsyncStorage.getItem('authToken');
         if (!token) throw new Error('Not authenticated');
         const res = await fetch(`${API_URL}/packs/open`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -100,7 +103,6 @@ export default function OpenPacksPage() {
         setCards(data.cards);
         setSelectedIndex(0);
         setShowCards(true);
-        setPackOpened(true);
       }, 600);
     } catch (err) {
       Alert.alert('Error', err.message || 'Could not open pack');
@@ -127,12 +129,12 @@ export default function OpenPacksPage() {
             <Text style={styles.cardRarity}>Rarity: {card.rarity}</Text>
           </Animatable.View>
         ) : (
-          <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 30 }} />
+          <ActivityIndicator size="large" color="#2894B0" style={styles.loadingIndicator} />
         )}
         <Image
           source={card.image_url ? { uri: card.image_url } : require('../assets/not-found-card.png')}
           onLoadEnd={() => setImageLoaded(true)}
-          style={{ width: 0, height: 0, position: 'absolute' }}
+          style={styles.preloadImage}
         />
         <View style={styles.navigationButtons}>
           <TouchableOpacity disabled={selectedIndex === 0} onPress={() => setSelectedIndex(i => i - 1)}>
@@ -150,60 +152,94 @@ export default function OpenPacksPage() {
   return (
     <View style={styles.container}>
       <NavBar />
-      <View style={styles.content}>
-        <Text style={styles.title}>🧪 Select Pack Filters</Text>
-        <Text style={styles.label}>Rarity</Text>
-        <View style={styles.pickerContainer}>
-          <Picker selectedValue={rarity} onValueChange={setRarity} style={styles.picker}>
-            {rarityOptions.map(r => (
-              <Picker.Item key={r} label={r.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} value={r} />
-            ))}
-          </Picker>
+      <View style={{ flex: 1, flexDirection: isPortrait ? 'column' : 'row', padding: 16 }}>
+        {/* Filters */}
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingRight: isPortrait ? 0 : 20 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>🧪 Select Pack Filters</Text>
+
+          {/* Rarity and Cards side by side with labels */}
+<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+  <View style={{ flex: 1, marginRight: 4 }}>
+    <Text style={styles.label}>Rarity</Text>
+    <View style={styles.pickerContainer}>
+      <Picker selectedValue={rarity} onValueChange={setRarity} style={styles.picker}>
+        {rarityOptions.map(r => (
+          <Picker.Item key={r} label={r.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} value={r} />
+        ))}
+      </Picker>
+    </View>
+  </View>
+  <View style={{ flex: 1, marginLeft: 4 }}>
+    <Text style={styles.label}>Cards</Text>
+    <View style={styles.pickerContainer}>
+      <Picker selectedValue={cardCount} onValueChange={setCardCount} style={styles.picker}>
+        {cardCountOptions.map(n => (
+          <Picker.Item key={n} label={`${n}`} value={n} />
+        ))}
+      </Picker>
+    </View>
+  </View>
+</View>
+
+
+          <Text style={styles.label}>Pack</Text>
+          <View style={styles.pickerContainer}>
+            <Picker selectedValue={packSource} onValueChange={setPackSource} style={styles.picker}>
+              {setList.map(name => (
+                <Picker.Item key={name} label={name} value={name} />
+              ))}
+            </Picker>
+          </View>
+
+          <TouchableOpacity onPress={generatePack} style={[styles.generateButton, { alignSelf: 'stretch', marginTop: 16 }]}>
+            <Text style={styles.generateButtonText}>Generate</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        {/* Pack Display */}
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#2894B0" style={styles.loadingIndicator} />
+          ) : (
+            pack && (
+              <View style={[styles.largePack, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Animatable.Image
+                  animation={opening ? 'flipOutY' : 'pulse'}
+                  duration={opening ? 500 : 2000}
+                  iterationCount={opening ? 1 : 'infinite'}
+                  easing="ease-in-out"
+                  source={require('../assets/Pack.png')}
+                  style={[styles.packImage, { maxHeight: isPortrait ? 220 : 180 }]}
+                />
+                <Text style={styles.packTitle}>{pack.name}</Text>
+                <Text style={styles.packPrice}>{pack.price} 🪙</Text>
+                <Animatable.View animation={opening ? 'zoomOut' : undefined} duration={500}>
+                  <TouchableOpacity onPress={openPack} style={[styles.openButton, { marginTop: 10 }]} disabled={opening}>
+                    <Text style={styles.openButtonText}>{opening ? 'Opening...' : 'Open'}</Text>
+                  </TouchableOpacity>
+                </Animatable.View>
+              </View>
+            )
+          )}
         </View>
-        <Text style={styles.label}>Cards</Text>
-        <View style={styles.pickerContainer}>
-          <Picker selectedValue={cardCount} onValueChange={setCardCount} style={styles.picker}>
-            {cardCountOptions.map(n => (
-              <Picker.Item key={n} label={`${n}`} value={n} />
-            ))}
-          </Picker>
-        </View>
-        <Text style={styles.label}>Pack</Text>
-        <View style={styles.pickerContainer}>
-          <Picker selectedValue={packSource} onValueChange={setPackSource} style={styles.picker}>
-            {setList.map(name => (
-              <Picker.Item key={name} label={name} value={name} />
-            ))}
-          </Picker>
-        </View>
-        <TouchableOpacity onPress={generatePack} style={styles.generateButton}>
-          <Text style={styles.generateButtonText}>Generate</Text>
-        </TouchableOpacity>
-        {loading ? (
-          <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 20 }} />
-        ) : (
-          pack && (
-            <View style={styles.largePack}>
-              <Animatable.Image
-                animation={opening ? 'flipOutY' : 'pulse'}
-                duration={opening ? 500 : 2000}
-                iterationCount={opening ? 1 : 'infinite'}
-                easing="ease-in-out"
-                source={{ uri: pack.imageUrl }}
-                style={styles.packImage}
-              />
-              <Text style={styles.packTitle}>{pack.name}</Text>
-              <Text style={styles.packPrice}>{pack.price} 🪙</Text>
-              <Animatable.View animation={opening ? 'zoomOut' : undefined} duration={500}>
-                <TouchableOpacity onPress={openPack} style={styles.openButton} disabled={opening}>
-                  <Text style={styles.openButtonText}>{opening ? 'Opening...' : 'Open'}</Text>
-                </TouchableOpacity>
-              </Animatable.View>
-            </View>
-          )
-        )}
-        {showCards && cards.length > 0 && renderCard()}
       </View>
+
+      {showCards && cards.length > 0 && (
+        <View style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#00000055',
+          zIndex: 999
+        }}>
+          {renderCard()}
+        </View>
+      )}
     </View>
   );
 }

@@ -5,17 +5,20 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { loginStyles } from '../styles/loginStyles';
+import { getLoginStyles } from '../styles/loginStyles';
 import { API_URL } from '../config';
 
 export default function LoginPage() {
   const navigation = useNavigation();
-
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const styles = getLoginStyles(isPortrait);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -43,32 +46,30 @@ export default function LoginPage() {
   };
 
   return (
-    <View style={loginStyles.container}>
-      <Text style={loginStyles.title}>Login</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Login</Text>
 
       <TextInput
         placeholder="Username"
-        style={loginStyles.input}
+        style={styles.input}
         value={username}
         onChangeText={setUsername}
       />
 
       <TextInput
         placeholder="Password"
-        style={loginStyles.input}
+        style={styles.input}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity onPress={handleLogin} style={loginStyles.button}>
-        <Text style={loginStyles.buttonText}>Sign In</Text>
+      <TouchableOpacity onPress={handleLogin} style={styles.button}>
+        <Text style={styles.buttonText}>Sign In</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.replace('Welcome')} style={{ marginTop: 20 }}>
-        <Text style={{ textAlign: 'center', color: '#003A49', fontWeight: 'bold' }}>
-          Back to Welcome Page
-        </Text>
+      <TouchableOpacity onPress={() => navigation.replace('Welcome')}>
+        <Text style={styles.backText}>Back to Welcome Page</Text>
       </TouchableOpacity>
     </View>
   );

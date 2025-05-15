@@ -8,17 +8,22 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../config';
-import { marketStyles as styles } from '../styles/marketStyles';
+import { getMarketStyles } from '../styles/marketStyles';
 import NavBar from '../components/NavBar';
 
 export default function SellCardPage() {
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const styles = getMarketStyles(isPortrait);
+
   const [myCards, setMyCards] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [priceMap, setPriceMap] = useState({}); // cardId+rarity+pack -> price
+  const [priceMap, setPriceMap] = useState({});
   const navigation = useNavigation();
 
   const fetchMyCards = async () => {
@@ -30,16 +35,16 @@ export default function SellCardPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Error fetching cards');
-  
+
       const enriched = await Promise.all(data.cards.map(async (card) => {
         const cacheKey = `card_${card.id}`;
         const cached = await AsyncStorage.getItem(cacheKey);
-  
+
         if (cached) {
           const parsed = JSON.parse(cached);
           return { ...parsed, quantity: card.quantity, rarity: card.rarity, pack: card.pack };
         }
-  
+
         try {
           const res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${card.id}`);
           const cardData = await res.json();
@@ -60,10 +65,10 @@ export default function SellCardPage() {
         } catch {
           return card;
         }
-  
+
         return card;
       }));
-  
+
       setMyCards(enriched);
     } catch (err) {
       Alert.alert('Error', err.message);
@@ -71,7 +76,6 @@ export default function SellCardPage() {
       setLoading(false);
     }
   };
-  
 
   const handleSell = async (card) => {
     const key = `${card.id}_${card.rarity}_${card.pack}`;
@@ -145,18 +149,10 @@ export default function SellCardPage() {
       <NavBar />
       <Text style={styles.title}>📤 Sell Cards</Text>
       <TouchableOpacity
-        style={{
-          backgroundColor: '#2894B0',
-          paddingVertical: 8,
-          paddingHorizontal: 16,
-          borderRadius: 8,
-          alignSelf: 'center',
-          marginBottom: 15,
-          marginTop: 5,
-        }}
+        style={styles.viewListingsButton}
         onPress={() => navigation.navigate('MyListings')}
       >
-        <Text style={{ color: '#fff', fontWeight: 'bold' }}>View My Listings</Text>
+        <Text style={styles.viewListingsText}>View My Listings</Text>
       </TouchableOpacity>
       {loading ? (
         <ActivityIndicator size="large" color="#2894B0" style={{ marginTop: 40 }} />

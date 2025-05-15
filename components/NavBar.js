@@ -5,11 +5,12 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
-import { NavBarStyles } from '../styles/NavBarStyles';
+import { getNavBarStyles } from '../styles/NavBarStyles';
 
 export default function NavBar() {
   const navigation = useNavigation();
@@ -17,13 +18,16 @@ export default function NavBar() {
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
 
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
+  const styles = getNavBarStyles(isPortrait);
+
   const handleLogout = async () => {
     await AsyncStorage.removeItem('authToken');
     setProfileMenuVisible(false);
     navigation.replace('Welcome');
   };
 
-  // Fetch profile image from the server using the auth token
   useEffect(() => {
     const loadProfileImage = async () => {
       try {
@@ -31,7 +35,7 @@ export default function NavBar() {
         if (!token) return;
 
         const res = await fetch(`${API_URL}/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const data = await res.json();
@@ -49,24 +53,19 @@ export default function NavBar() {
 
   return (
     <>
-      <View style={NavBarStyles.navBar}>
+      <View style={styles.navBar}>
         {/* Left - Market */}
         <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-          <Text style={NavBarStyles.marketText}>Market</Text>
+          <Text style={styles.marketText}>Market</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('NearbyLocation')}>
-          <Text style={NavBarStyles.marketText}>Check-In</Text>
-        </TouchableOpacity>
-
 
         {/* Center - Logo */}
         <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-          <Image source={require('../assets/logo.png')} style={NavBarStyles.logo} />
+          <Image source={require('../assets/logo.png')} style={styles.logo} />
         </TouchableOpacity>
 
-        {/* Right - Profile + Cart */}
-        <View style={NavBarStyles.rightIcons}>
+        {/* Right - Icons */}
+        <View style={styles.rightIcons}>
           <TouchableOpacity onPress={() => setProfileMenuVisible(!profileMenuVisible)}>
             <Image
               source={
@@ -74,55 +73,53 @@ export default function NavBar() {
                   ? { uri: profileImage }
                   : require('../assets/profile-placeholder.png')
               }
-              style={NavBarStyles.profile}
+              style={styles.profile}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Market')}>
-            <Image source={require('../assets/cart-icon.png')} style={NavBarStyles.cart} />
+            <Image source={require('../assets/cart-icon.png')} style={styles.cart} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Dropdown Market */}
+      {/* Market Menu */}
       <Modal transparent visible={menuVisible} animationType="fade">
         <TouchableOpacity
-          style={NavBarStyles.overlay}
+          style={styles.overlay}
           onPress={() => setMenuVisible(false)}
         >
-          <View style={NavBarStyles.dropdown}>
+          <View style={styles.dropdown}>
             <TouchableOpacity onPress={() => {
               setMenuVisible(false);
               navigation.navigate('Market');
             }}>
-              <Text style={NavBarStyles.dropdownItem}>Buy</Text>
+              <Text style={styles.dropdownItem}>Buy</Text>
             </TouchableOpacity>
-
             <TouchableOpacity onPress={() => {
               setMenuVisible(false);
               navigation.navigate('SellCard');
             }}>
-              <Text style={NavBarStyles.dropdownItem}>Sell</Text>
+              <Text style={styles.dropdownItem}>Sell</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
 
-      {/* Dropdown Profile */}
+      {/* Profile Menu */}
       <Modal transparent visible={profileMenuVisible} animationType="fade">
         <TouchableOpacity
-          style={NavBarStyles.profileOverlay}
+          style={styles.profileOverlay}
           onPress={() => setProfileMenuVisible(false)}
         >
-          <View style={NavBarStyles.profileMenu}>
+          <View style={styles.profileMenu}>
             <TouchableOpacity onPress={() => {
               setProfileMenuVisible(false);
               navigation.navigate('Profile');
             }}>
-              <Text style={NavBarStyles.profileItem}>View Profile</Text>
+              <Text style={styles.profileItem}>View Profile</Text>
             </TouchableOpacity>
-
             <TouchableOpacity onPress={handleLogout}>
-              <Text style={NavBarStyles.profileItem}>Logout</Text>
+              <Text style={styles.profileItem}>Logout</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
