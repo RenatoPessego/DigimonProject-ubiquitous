@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../components/ThemeContext';
 import {
   View,
   Text,
@@ -19,7 +20,8 @@ import NavBar from '../components/NavBar';
 export default function SellCardPage() {
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const styles = getMarketStyles(isPortrait);
+  const { darkMode } = useTheme();
+  const styles = getMarketStyles(isPortrait, darkMode);
 
   const [myCards, setMyCards] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../components/ThemeContext';
 import {
   View,
   Text,

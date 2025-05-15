@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useTheme } from '../components/ThemeContext';
 import {
   View,
   Text,
@@ -27,7 +28,8 @@ export default function ChatPage() {
 
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const styles = getChatStyles(isPortrait);
+  const { darkMode } = useTheme();
+  const styles = getChatStyles(isPortrait, darkMode);
 
   const fetchMessages = async () => {
     try {

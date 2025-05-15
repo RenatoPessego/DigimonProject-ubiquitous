@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../components/ThemeContext';
 import {
   View,
   Text,
@@ -21,7 +22,8 @@ export default function ChatUserListPage() {
 
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const styles = getMarketStyles(isPortrait);
+  const { darkMode } = useTheme();
+  const styles = getMarketStyles(isPortrait, darkMode);
 
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);

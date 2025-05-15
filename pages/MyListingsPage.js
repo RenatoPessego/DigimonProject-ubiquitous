@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../components/ThemeContext';
 import {
   View,
   Text,
@@ -26,7 +27,8 @@ export default function MyListingsPage() {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const styles = getMarketStyles(isPortrait);
+  const { darkMode } = useTheme();
+  const styles = getMarketStyles(isPortrait, darkMode);
 
   const fetchListings = async () => {
     try {

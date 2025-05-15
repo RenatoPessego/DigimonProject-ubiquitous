@@ -1,46 +1,57 @@
-// styles/profileStyles.js
 import { StyleSheet } from 'react-native';
 
-export const getProfileStyles = (isPortrait) =>
+// Accepts both orientation and theme mode
+export const getProfileStyles = (isPortrait, darkMode = false) =>
   StyleSheet.create({
+    // Main container of profile screen
     container: {
       padding: isPortrait ? 10 : 20,
       paddingBottom: 100,
       alignItems: 'center',
     },
+
+    // Loading and error fallback containers
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: darkMode ? '#121212' : '#fff',
     },
     errorContainer: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: darkMode ? '#121212' : '#fff',
     },
+
+    // Profile picture
     avatar: {
       width: isPortrait ? 100 : 120,
       height: isPortrait ? 100 : 120,
       borderRadius: 60,
       marginVertical: 10,
+      alignSelf: 'center',
     },
+
+    // Profile name and basic info
     name: {
       fontSize: 22,
       fontWeight: 'bold',
       marginBottom: 4,
+      color: darkMode ? '#fff' : '#000',
     },
     username: {
       fontSize: 16,
-      color: '#888',
+      color: darkMode ? '#aaa' : '#888',
     },
     email: {
       fontSize: 16,
-      color: '#444',
+      color: darkMode ? '#ccc' : '#444',
       marginTop: 4,
     },
     birthDate: {
       fontSize: 16,
-      color: '#444',
+      color: darkMode ? '#ccc' : '#444',
       marginTop: 4,
     },
     balance: {
@@ -50,17 +61,22 @@ export const getProfileStyles = (isPortrait) =>
       marginTop: 10,
       marginBottom: 20,
     },
+
+    // Section titles like "Your Cards"
     sectionTitle: {
       fontSize: 20,
       fontWeight: 'bold',
       marginVertical: 10,
       textAlign: 'center',
+      color: darkMode ? '#fff' : '#000',
     },
+
+    // Grid card display
     cardBox: {
       width: '30%',
       margin: '1.5%',
       alignItems: 'center',
-      backgroundColor: '#f2f2f2',
+      backgroundColor: darkMode ? '#2A2A2A' : '#f2f2f2',
       borderRadius: 8,
       padding: 5,
       elevation: 2,
@@ -73,13 +89,16 @@ export const getProfileStyles = (isPortrait) =>
     cardName: {
       fontSize: 12,
       fontWeight: 'bold',
-      textAlign: 'center',
+      textAlign: 'center',  
       marginTop: 4,
+      color: darkMode ? '#fff' : '#000',
     },
     cardQty: {
       fontSize: 12,
-      color: '#555',
+      color: darkMode ? '#ccc' : '#555',
     },
+
+    // Pagination control
     paginationContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
@@ -94,7 +113,10 @@ export const getProfileStyles = (isPortrait) =>
     pageNumber: {
       fontSize: 16,
       fontWeight: 'bold',
+      color: darkMode ? '#fff' : '#000',
     },
+
+    // Modal styles
     modalOverlay: {
       flex: 1,
       backgroundColor: 'rgba(0, 0, 0, 0.6)',
@@ -104,7 +126,7 @@ export const getProfileStyles = (isPortrait) =>
     modalContent: {
       width: '95%',
       maxHeight: '90%',
-      backgroundColor: '#fff',
+      backgroundColor: darkMode ? '#1E1E1E' : '#fff',
       borderRadius: 12,
       padding: 15,
       alignItems: 'center',
@@ -126,25 +148,29 @@ export const getProfileStyles = (isPortrait) =>
       fontWeight: 'bold',
       marginBottom: 12,
       textAlign: 'center',
+      color: darkMode ? '#fff' : '#000',
     },
     modalText: {
-  fontSize: 14,
-  marginVertical: 4,
-  textAlign: 'left',
-  paddingHorizontal: 12,
-},
+      fontSize: 14,
+      marginVertical: 4,
+      textAlign: 'left',
+      paddingHorizontal: 12,
+      color: darkMode ? '#eee' : '#000',
+    },
     modalDesc: {
-  fontSize: 13,
-  color: '#333',
-  paddingHorizontal: 12,
-  marginTop: 10,
-  textAlign: 'left',
-},
+      fontSize: 13,
+      color: darkMode ? '#ccc' : '#333',
+      paddingHorizontal: 12,
+      marginTop: 10,
+      textAlign: 'center',
+    },
     modalSubtitle: {
       color: '#2894B0',
       fontWeight: 'bold',
       textAlign: 'center',
     },
+
+    // Sell buttons
     quickSellButton: {
       backgroundColor: '#2894B0',
       paddingVertical: 10,
@@ -157,23 +183,29 @@ export const getProfileStyles = (isPortrait) =>
       fontWeight: 'bold',
     },
     marketSellButton: {
-      backgroundColor: '#ccc',
+      backgroundColor: darkMode ? '#444' : '#ccc',
       paddingVertical: 10,
       paddingHorizontal: 15,
       borderRadius: 8,
     },
     marketSellButtonText: {
-      color: '#333',
+      color: darkMode ? '#fff' : '#333',
       fontWeight: 'bold',
     },
+
+    // Input for setting price
     inputPrice: {
       borderWidth: 1,
-      borderColor: '#ccc',
+      borderColor: darkMode ? '#666' : '#ccc',
       borderRadius: 6,
       padding: 10,
       marginBottom: 15,
       width: '100%',
+      color: darkMode ? '#fff' : '#000',
+      backgroundColor: darkMode ? '#2C2C2C' : '#fff',
     },
+
+    // Button row inside modal
     modalButtonRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -183,7 +215,7 @@ export const getProfileStyles = (isPortrait) =>
       borderRadius: 6,
     },
     modalButtonCancel: {
-      backgroundColor: '#999',
+      backgroundColor: darkMode ? '#777' : '#999',
     },
     modalButtonConfirm: {
       backgroundColor: '#2894B0',

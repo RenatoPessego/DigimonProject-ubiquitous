@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../components/ThemeContext';
 import {
   View,
   Text,
@@ -22,7 +23,8 @@ export default function HomePage() {
   const [user, setUser] = useState(null);
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const styles = getHomeStyles(isPortrait);
+  const { darkMode } = useTheme();
+  const styles = getHomeStyles(isPortrait, darkMode);
 
   const fetchUserData = async () => {
     try {

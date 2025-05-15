@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '../components/ThemeContext';
 import {
   View,
   Text,
@@ -31,7 +32,8 @@ export default function OpenPacksPage() {
 
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const styles = getOpenPacksStyles(isPortrait);
+  const { darkMode } = useTheme();
+  const styles = getOpenPacksStyles(isPortrait, darkMode);
 
   const rarityOptions = ['common', 'rare', 'super_rare', 'legendary'];
   const cardCountOptions = [1, 3, 5, 7, 9];
