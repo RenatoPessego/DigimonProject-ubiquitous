@@ -18,6 +18,7 @@ import { API_URL } from '../config';
 import { getOpenPacksStyles } from '../styles/openPacksStyles';
 import NavBar from '../components/NavBar';
 import * as Animatable from 'react-native-animatable';
+import { waitFor } from '@testing-library/react-native';
 
 export default function OpenPacksPage() {
   const [rarity, setRarity] = useState('common');
@@ -104,11 +105,17 @@ export default function OpenPacksPage() {
           }),
         });
         const data = await res.json();
+        if (res.status === 402) {
+          Alert.alert('Error', 'Insufficient balance.');
+          throw new Error('Insufficient balance');
+        }
         if (!res.ok) throw new Error(data.message);
+        
+        
         setCards(data.cards);
         setSelectedIndex(0);
         setShowCards(true);
-      }, 600);
+      }, 1000);
     } catch (err) {
       Alert.alert('Error', err.message || 'Could not open pack');
     } finally {
@@ -181,8 +188,13 @@ export default function OpenPacksPage() {
                   }}
                   style={{ paddingVertical: 12 }}
                 >
-                  <Text style={{ fontSize: 16, color: darkMode ? '#fff' : '#000' }}>{item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Text>
-                </TouchableOpacity>
+                
+              <Text style={{ fontSize: 16, color: darkMode ? '#fff' : '#000' }}>
+                {typeof item === 'string'
+                  ? item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                  : item}
+              </Text>                
+              </TouchableOpacity>
               )}
             />
           </View>

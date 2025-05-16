@@ -151,6 +151,8 @@ export const getMarketStyles = (isPortrait, darkMode = false) =>
       padding: 10,
       borderRadius: 6,
       alignItems: 'center',
+      alignContent: 'center',
+      textAlign: 'center',
       flex: 1,
       marginHorizontal: 5,
     },
@@ -159,6 +161,9 @@ export const getMarketStyles = (isPortrait, darkMode = false) =>
     modalButtonText: {
       color: '#fff',
       fontWeight: 'bold',
+      allignSelf: 'center',
+      alignContent: 'center',
+      fontSize:12
     },
 
     // Container for edit/delete buttons

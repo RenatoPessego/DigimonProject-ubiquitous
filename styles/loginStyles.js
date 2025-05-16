@@ -41,4 +41,5 @@ export const getLoginStyles = (isPortrait) =>
       fontWeight: 'bold',
       marginTop: 20,
     },
+    
   });

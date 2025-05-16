@@ -48,17 +48,17 @@ exports.generatePacks = async (req, res) => {
     const rarity = rarityType || 'common';
     const count = parseInt(cardCount) || 1;
     const source = packSource || 'Default Set';
-
+    
     const profile = rarityProfiles[rarity];
     if (!profile) return res.status(400).json({ message: 'Invalid rarity type' });
-
+    
     const packs = Array.from({ length: 6 }).map(() => ({
       id: uuidv4(),
       name: `${source} - ${profile.name} x${count}`,
       rarity: rarity,
       cardCount: count,
       packSource: source,
-      price: profile.price * count,
+      price: CalculatePrice(profile.price, count),
       imageUrl: `${process.env.BASE_URL || 'http://localhost:3000'}/assets/generic-pack.png`
     }));
 
@@ -68,6 +68,13 @@ exports.generatePacks = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+function CalculatePrice(profilePrice, count){
+  tempPrice = 0;
+  if(profilePrice == 0) tempPrice = 1;
+  else tempPrice = profilePrice;
+  const FinalPrice = profilePrice + (tempPrice * (count - 1));
+  return FinalPrice;
+}
 
 // POST /packs/open
 // POST /packs/open
@@ -85,7 +92,13 @@ exports.openPack = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) return res.status(401).json({ message: 'Unauthorized' });
-
+    price = CalculatePrice(profile.price, cardCount);
+    if (user.balance < price) {
+      return res.status(402).json({ message: 'Insufficient balance.' });
+    }
+    else {
+      user.balance -= price;
+    }
     if (!setCache[packSource]) {
       const apiRes = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?cardset=${encodeURIComponent(packSource)}`);
       const data = await apiRes.json();

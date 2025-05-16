@@ -102,7 +102,7 @@ export default function MyListingsPage() {
         style={styles.cardImage}
       />
       <View style={styles.cardInfo}>
-        <Text style={styles.cardText}>Card ID: {item.cardId}</Text>
+        <Text style={styles.cardText}>Card: {item.name}</Text>
         <Text style={styles.cardText}>Rarity: {item.rarity}</Text>
         <Text style={styles.cardText}>Pack: {item.pack}</Text>
         <Text style={styles.cardPrice}>Price: {item.price} 🪙</Text>

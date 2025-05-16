@@ -39,20 +39,24 @@ export const getProfileStyles = (isPortrait, darkMode = false) =>
       fontWeight: 'bold',
       marginBottom: 4,
       color: darkMode ? '#fff' : '#000',
+      alignSelf: 'center',
     },
     username: {
       fontSize: 16,
       color: darkMode ? '#aaa' : '#888',
+      alignSelf: 'center',
     },
     email: {
       fontSize: 16,
       color: darkMode ? '#ccc' : '#444',
       marginTop: 4,
+      alignSelf: 'center',
     },
     birthDate: {
       fontSize: 16,
       color: darkMode ? '#ccc' : '#444',
       marginTop: 4,
+      alignSelf: 'center',
     },
     balance: {
       fontSize: 18,
@@ -60,6 +64,8 @@ export const getProfileStyles = (isPortrait, darkMode = false) =>
       color: '#2894B0',
       marginTop: 10,
       marginBottom: 20,
+      alignSelf: 'center',
+      allignItems: 'center',
     },
 
     // Section titles like "Your Cards"
@@ -146,7 +152,7 @@ export const getProfileStyles = (isPortrait, darkMode = false) =>
     modalTitle: {
       fontSize: 20,
       fontWeight: 'bold',
-      marginBottom: 12,
+      marginBottom: 20,
       textAlign: 'center',
       color: darkMode ? '#fff' : '#000',
     },

@@ -21,8 +21,8 @@ export default function RegisterPage() {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const isPortrait = height >= width;
-  const { darkMode } = useTheme();
-  const registerStyles = getRegisterStyles(isPortrait, darkMode);
+
+  const registerStyles = getRegisterStyles(isPortrait);
 
   const [form, setForm] = useState({
     name: '',
@@ -130,12 +130,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <View style={[registerStyles.container, { backgroundColor: darkMode ? '#111' : '#fff' }]}>
+    <View style={[registerStyles.container, { backgroundColor:'#fff' }]}>
       <Text style={registerStyles.title}>Create Account</Text>
 
       <TextInput
         placeholder="Name"
-        placeholderTextColor={darkMode ? '#aaa' : '#666'}
+        placeholderTextColor={'#666'}
         style={registerStyles.input}
         value={form.name}
         onChangeText={(text) => setForm({ ...form, name: text })}
@@ -143,7 +143,7 @@ export default function RegisterPage() {
 
       <TextInput
         placeholder="Username"
-        placeholderTextColor={darkMode ? '#aaa' : '#666'}
+        placeholderTextColor={'#666'}
         style={registerStyles.input}
         value={form.username}
         onChangeText={(text) => setForm({ ...form, username: text })}
@@ -151,7 +151,7 @@ export default function RegisterPage() {
 
       <TextInput
         placeholder="Email"
-        placeholderTextColor={darkMode ? '#aaa' : '#666'}
+        placeholderTextColor={'#666'}
         style={registerStyles.input}
         value={form.email}
         onChangeText={(text) => setForm({ ...form, email: text })}
@@ -160,7 +160,7 @@ export default function RegisterPage() {
 
       <TextInput
         placeholder="Password"
-        placeholderTextColor={darkMode ? '#aaa' : '#666'}
+        placeholderTextColor={'#666'}
         style={registerStyles.input}
         secureTextEntry
         value={form.password}
@@ -169,21 +169,22 @@ export default function RegisterPage() {
 
       <TextInput
         placeholder="Confirm Password"
-        placeholderTextColor={darkMode ? '#aaa' : '#666'}
+        placeholderTextColor={'#666'}
         style={registerStyles.input}
         secureTextEntry
         value={form.confirmPassword}
         onChangeText={(text) => setForm({ ...form, confirmPassword: text })}
       />
 
-      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={registerStyles.input}>
-        <Text style={{ color: darkMode ? '#fff' : '#000' }}>
+      <TouchableOpacity  onPress={() => setShowDatePicker(true)} style={registerStyles.input}>
+        <Text testID='TextBirth' style={{ color: '#000' }}>
           Birth Date: {form.birthDate.toISOString().split('T')[0]}
         </Text>
       </TouchableOpacity>
 
       {showDatePicker && (
         <DateTimePicker
+          testID='birthDatePicker'
           value={form.birthDate}
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
@@ -191,6 +192,7 @@ export default function RegisterPage() {
             setShowDatePicker(false);
             if (date) setForm({ ...form, birthDate: date });
           }}
+          
           maximumDate={new Date()}
         />
       )}

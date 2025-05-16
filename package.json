@@ -48,8 +48,9 @@
   "preset": "jest-expo",
   "setupFilesAfterEnv": ["<rootDir>/jestSetup.js"],
   "transformIgnorePatterns": [
-    "node_modules/(?!(react-native|@react-native|expo|expo-asset|expo-font|expo-constants|expo-modules-core|@expo|@expo/vector-icons|@expo-google-fonts|@react-navigation|native-base|unimodules|@unimodules|sentry-expo)/)"
+  "node_modules/(?!(react-native|@react-native|expo|expo-asset|expo-font|expo-constants|expo-modules-core|@expo|@expo/vector-icons|@expo-google-fonts|@react-navigation|native-base|unimodules|@unimodules|sentry-expo|@react-native-community/datetimepicker)/)"
   ]
+
 }
 
 ,

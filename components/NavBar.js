@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   Modal,
   useWindowDimensions,
-  Switch,
+  SafeAreaView,
+  Platform,
+  UIManager
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,21 +17,131 @@ import { API_URL } from '../config';
 import { getNavBarStyles } from '../styles/NavBarStyles';
 import { useTheme } from '../components/ThemeContext';
 
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const MenuModal = ({ 
+  visible, 
+  onClose, 
+  items, 
+  darkMode, 
+  isPortrait, 
+  anchorRef,
+  alignLeft = false 
+}) => {
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const { width } = useWindowDimensions();
+  const styles = getNavBarStyles(isPortrait, darkMode);
+
+  useEffect(() => {
+    if (visible && anchorRef.current) {
+      anchorRef.current.measureInWindow((x, y, w, h) => {
+        const menuWidth = isPortrait ? 150 : 200;
+        let left = x;
+        
+        // Ajuste para alinhar à esquerda
+        if (alignLeft) {
+          left = x + w - menuWidth;
+        }
+
+        // Garante que não saia da tela
+        left = Math.max(10, Math.min(left, width - menuWidth - 10));
+
+        setPosition({
+          top: y + h + (Platform.OS === 'ios' ? 10 : 5),
+          left,
+          width: menuWidth
+        });
+      });
+    }
+  }, [visible, width, isPortrait]);
+
+  return (
+    <Modal 
+      transparent 
+      visible={visible} 
+      animationType="fade" 
+      supportedOrientations={['portrait', 'landscape']}
+      onRequestClose={onClose}
+    >
+      <TouchableOpacity
+        style={styles.modalOverlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <SafeAreaView style={{ flex: 1 }}>
+          <View 
+            style={[
+              styles.dropdown, 
+              {
+                position: 'absolute',
+                top: position.top,
+                left: position.left,
+                width: position.width
+              }
+            ]}
+          >
+            {items.map((item, index) => (
+              <TouchableOpacity 
+                key={index} 
+                onPress={() => {
+                  item.onPress();
+                  onClose();
+                }}
+                style={styles.menuItem}
+              >
+                <Text style={styles.dropdownItem}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </SafeAreaView>
+      </TouchableOpacity>
+    </Modal>
+  );
+};
+
 export default function NavBar() {
   const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const { darkMode, toggleTheme } = useTheme();
-  const { width, height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const isPortrait = height >= width;
   const styles = getNavBarStyles(isPortrait, darkMode);
 
+  const marketButtonRef = useRef(null);
+  const profileButtonRef = useRef(null);
+
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('authToken');
+  try {
+    const refreshToken = await AsyncStorage.getItem('refreshToken');
+    
+    // Chamar endpoint de logout no backend se existir
+    if (refreshToken) {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+    }
+
+    // Limpar storage local
+    await AsyncStorage.multiRemove([
+      'authToken',
+      'accessToken',
+      'refreshToken',
+      'rememberedUser'
+    ]);
+    
     setProfileMenuVisible(false);
     navigation.replace('Welcome');
-  };
+  } catch (error) {
+    console.error('Error during logout:', error);
+    navigation.replace('Welcome');
+  }
+};
 
   useEffect(() => {
     const loadProfileImage = async () => {
@@ -54,42 +166,56 @@ export default function NavBar() {
     loadProfileImage();
   }, []);
 
+  const marketItems = [
+    { label: 'Buy', onPress: () => navigation.navigate('Market') },
+    { label: 'Sell', onPress: () => navigation.navigate('SellCard') }
+  ];
+
+  const profileItems = [
+    { label: 'View Profile', onPress: () => navigation.navigate('Profile') },
+    { label: 'Logout', onPress: handleLogout }
+  ];
+
   return (
-    <>
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.navBar}>
         {/* Left - Market + Theme */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-            <Text style={styles.marketText}> Market </Text>
+        <View style={styles.leftContainer}>
+          <TouchableOpacity 
+            ref={marketButtonRef}
+            onPress={() => setMenuVisible(!menuVisible)}
+          >
+            <Text style={styles.marketText}>Market</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
-  <Feather
-    name={darkMode ? 'moon' : 'sun'}
-    size={22}
-    color={darkMode ? '#fff' : '#000'}
-  />
-</TouchableOpacity>
-
+          <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
+            <Feather
+              name={darkMode ? 'moon' : 'sun'}
+              size={22}
+              color={darkMode ? '#fff' : '#000'}
+            />
+          </TouchableOpacity>
         </View>
 
-        {/* Center - Logo (clickable only on image) */}
-        <View style={{ position: 'absolute', left: 0, right: 0, alignItems: 'center'}}>
+        {/* Center - Logo */}
+        <View style={styles.logoContainer}>
           <TouchableOpacity onPress={() => navigation.navigate('Home')}>
             <Image source={require('../assets/logo.png')} style={styles.logo} />
           </TouchableOpacity>
         </View>
 
-        {/* Right - Profile + Cart */}
-        <TouchableOpacity onPress={() => navigation.navigate('NearbyLocation')}>
-          <Text style={styles.marketText}>📍</Text>
-        </TouchableOpacity>
-        <View style={styles.leftIcons}>
-          <TouchableOpacity onPress={() => setProfileMenuVisible(!profileMenuVisible)}>
+        {/* Right - Location + Profile + Cart */}
+        <View style={styles.rightIcons}>
+          <TouchableOpacity onPress={() => navigation.navigate('NearbyLocation')}>
+            <Text style={styles.locationIcon}>📍</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            ref={profileButtonRef}
+            onPress={() => setProfileMenuVisible(!profileMenuVisible)}
+          >
             <Image
-              source={
-                profileImage ? { uri: profileImage } : require('../assets/profile-placeholder.png')
-              }
+              source={profileImage ? { uri: profileImage } : require('../assets/profile-placeholder.png')}
               style={styles.profile}
             />
           </TouchableOpacity>
@@ -104,47 +230,25 @@ export default function NavBar() {
       </View>
 
       {/* Market Menu */}
-      <Modal transparent visible={menuVisible} animationType="fade">
-        <TouchableOpacity
-          style={styles.overlay}
-          onPress={() => setMenuVisible(false)}
-        >
-          <View style={styles.dropdown}>
-            <TouchableOpacity onPress={() => {
-              setMenuVisible(false);
-              navigation.navigate('Market');
-            }}>
-              <Text style={styles.dropdownItem}>Buy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {
-              setMenuVisible(false);
-              navigation.navigate('SellCard');
-            }}>
-              <Text style={styles.dropdownItem}>Sell</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      <MenuModal
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        items={marketItems}
+        darkMode={darkMode}
+        isPortrait={isPortrait}
+        anchorRef={marketButtonRef}
+      />
 
-      {/* Profile Menu */}
-      <Modal transparent visible={profileMenuVisible} animationType="fade">
-        <TouchableOpacity
-          style={styles.profileOverlay}
-          onPress={() => setProfileMenuVisible(false)}
-        >
-          <View style={styles.profileMenu}>
-            <TouchableOpacity onPress={() => {
-              setProfileMenuVisible(false);
-              navigation.navigate('Profile');
-            }}>
-              <Text style={styles.profileItem}>View Profile</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLogout}>
-              <Text style={styles.profileItem}>Logout</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-    </>
+      {/* Profile Menu (abre para a esquerda) */}
+      <MenuModal
+        visible={profileMenuVisible}
+        onClose={() => setProfileMenuVisible(false)}
+        items={profileItems}
+        darkMode={darkMode}
+        isPortrait={isPortrait}
+        anchorRef={profileButtonRef}
+        alignLeft={true}
+      />
+    </SafeAreaView>
   );
 }

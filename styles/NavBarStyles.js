@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
 
-// Accepts both orientation and theme mode
-export const getNavBarStyles = (isPortrait, darkMode = false) =>
-  StyleSheet.create({
-    // Top navigation bar container
+export const getNavBarStyles = (isPortrait, darkMode = false) => {
+  return StyleSheet.create({
+    safeArea: {
+      backgroundColor: darkMode ? '#1E1E1E' : '#2894B0',
+    },
     navBar: {
       height: 60,
       backgroundColor: darkMode ? '#1E1E1E' : '#2894B0',
@@ -12,94 +13,70 @@ export const getNavBarStyles = (isPortrait, darkMode = false) =>
       justifyContent: 'space-between',
       paddingHorizontal: isPortrait ? 12 : 24,
       paddingTop: 10,
-      position: 'relative',
     },
-
-    // "Market" text button on the left
+    leftContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
     marketText: {
       color: '#fff',
       fontWeight: 'bold',
+      fontSize: 16,
     },
-
-    // App logo in the center
+    themeButton: {
+      marginLeft: 12,
+    },
+    logoContainer: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+    },
     logo: {
       height: isPortrait ? 35 : 45,
       resizeMode: 'contain',
       width: isPortrait ? 100 : 120,
     },
-
-    // Container for profile/cart/theme icons on the right
     rightIcons: {
       flexDirection: 'row',
       alignItems: 'center',
+      gap: 12,
     },
-    leftIcons: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    locationIcon: {
+      fontSize: 20,
     },
-
-    // Profile avatar circle
     profile: {
       width: isPortrait ? 32 : 40,
       height: isPortrait ? 32 : 40,
       borderRadius: 20,
-      marginRight: 12,
     },
-
-    // Shopping cart icon
     cart: {
       width: 24,
       height: 24,
     },
-
-    // Background overlay when market menu is open
-    overlay: {
+    modalOverlay: {
       flex: 1,
       backgroundColor: '#00000066',
-      justifyContent: 'flex-start',
-      paddingTop: 65,
-      paddingLeft: 15,
     },
-
-    // Dropdown panel for "Market" menu
     dropdown: {
       backgroundColor: darkMode ? '#2C2C2C' : '#fff',
-      borderRadius: 6,
-      padding: 10,
+      borderRadius: 8,
+      paddingVertical: 8,
       elevation: 5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
     },
-
-    // Individual dropdown items
+    menuItem: {
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
     dropdownItem: {
       fontSize: 16,
-      marginVertical: 6,
-      fontWeight: '600',
-      color: darkMode ? '#eee' : '#333',
-    },
-
-    // Overlay for profile dropdown
-    profileOverlay: {
-      flex: 1,
-      alignItems: 'flex-end',
-      paddingTop: 60,
-      paddingRight: 15,
-      backgroundColor: '#00000044',
-    },
-
-    // Panel for profile options
-    profileMenu: {
-      backgroundColor: darkMode ? '#2C2C2C' : 'white',
-      borderRadius: 8,
-      padding: 10,
-      width: 150,
-      elevation: 5,
-    },
-
-    // Individual profile menu items
-    profileItem: {
-      fontSize: 16,
-      paddingVertical: 8,
       fontWeight: '600',
       color: darkMode ? '#eee' : '#333',
     },
   });
+};

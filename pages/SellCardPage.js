@@ -127,7 +127,7 @@ export default function SellCardPage() {
           style={styles.cardImage}
         />
         <View style={styles.cardInfo}>
-          <Text style={styles.cardText}>Card ID: {item.id}</Text>
+          <Text style={styles.cardText}>Card: {item.name}</Text>
           <Text style={styles.cardText}>Rarity: {item.rarity}</Text>
           <Text style={styles.cardText}>Pack: {item.pack}</Text>
           <Text style={styles.cardText}>Quantity: {item.quantity}</Text>
