@@ -60,7 +60,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#2894B0" />
+        <ActivityIndicator testID="ActivityIndicator" size="large" color="#2894B0" />
       </View>
     );
   }

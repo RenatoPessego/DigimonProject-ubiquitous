@@ -114,6 +114,7 @@ export default function MarketPage() {
         <Text style={styles.title}>🛒 Market</Text>
         {loading ? (
           <ActivityIndicator
+            testID="ActivityIndicator"
             size="large"
             color="#2894B0"
             style={styles.activityIndicator}
