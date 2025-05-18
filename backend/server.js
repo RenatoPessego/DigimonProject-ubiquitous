@@ -19,14 +19,15 @@ const path = require('path');
 const app = express();
 const PORT = 5000;
 
-// MongoDB Atlas
-mongoose.connect('mongodb+srv://Ubiquitous:8gl4dWSOoskdAl8o@cluster0.cixc7gb.mongodb.net/Ubiquos', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB Atlas connected'))
-.catch((err) => console.error('MongoDB error:', err));
-
+if (process.env.NODE_ENV !== 'test') {
+  // MongoDB Atlas
+  mongoose.connect('mongodb+srv://Ubiquitous:8gl4dWSOoskdAl8o@cluster0.cixc7gb.mongodb.net/Ubiquos', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('MongoDB Atlas connected'))
+  .catch((err) => console.error('MongoDB error:', err));
+}
 app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
@@ -40,6 +41,10 @@ app.use('/messages', messageRoutes);
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/user', userRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app; // Export the app for testing

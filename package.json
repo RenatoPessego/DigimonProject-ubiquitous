@@ -45,14 +45,13 @@
     "jest-fetch-mock": "^3.0.3"
   },
   "jest": {
-  "preset": "jest-expo",
-  "setupFilesAfterEnv": ["<rootDir>/jestSetup.js"],
-  "transformIgnorePatterns": [
-  "node_modules/(?!(react-native|@react-native|expo|expo-asset|expo-font|expo-constants|expo-modules-core|@expo|@expo/vector-icons|@expo-google-fonts|@react-navigation|native-base|unimodules|@unimodules|sentry-expo|@react-native-community/datetimepicker)/)"
-  ]
-
-}
-
-,
+    "preset": "jest-expo",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jestSetup.js"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(react-native|@react-native|expo|expo-asset|expo-font|expo-constants|expo-modules-core|@expo|@expo/vector-icons|@expo-google-fonts|@react-navigation|native-base|unimodules|@unimodules|sentry-expo|@react-native-community/datetimepicker)/)"
+    ]
+  },
   "private": true
 }
