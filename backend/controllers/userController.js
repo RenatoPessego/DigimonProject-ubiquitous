@@ -10,7 +10,7 @@ const CHECKIN_REWARDS = {
   'Tokyo': 50
 };
 
-exports.pushToken = async (req, res) => {
+exports.pushToken = async (req, res) => {  // creates a new push token
   try {
     const user = await User.findByIdAndUpdate(req.user.id, {
       pushToken: req.body.token
@@ -22,7 +22,7 @@ exports.pushToken = async (req, res) => {
   }
 }
 
-exports.checkin = async (req, res) => {
+exports.checkin = async (req, res) => { // Check-in user to a location and reward them
   const { location } = req.body;
   if (!location || !CHECKIN_REWARDS[location]) {
     return res.status(400).json({ message: 'Invalid location.' });
@@ -42,11 +42,11 @@ exports.checkin = async (req, res) => {
       return res.status(400).json({ message: `You already checked in at ${location} today.` });
     }
 
-    // Dar recompensa
+    // Give the reward
     const reward = CHECKIN_REWARDS[location];
     user.balance += reward;
 
-    // Guardar histórico
+    // Save the check-in history
     user.checkInHistory.push({
       location,
       date: new Date()

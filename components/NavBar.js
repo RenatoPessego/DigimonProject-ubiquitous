@@ -40,12 +40,10 @@ const MenuModal = ({
         const menuWidth = isPortrait ? 150 : 200;
         let left = x;
         
-        // Ajuste para alinhar à esquerda
         if (alignLeft) {
           left = x + w - menuWidth;
         }
 
-        // Garante que não saia da tela
         left = Math.max(10, Math.min(left, width - menuWidth - 10));
 
         setPosition({
@@ -118,7 +116,7 @@ export default function NavBar() {
   try {
     const refreshToken = await AsyncStorage.getItem('refreshToken');
     
-    // Chamar endpoint de logout no backend se existir
+    // Call the logout endpoint
     if (refreshToken) {
       await fetch(`${API_URL}/auth/logout`, {
         method: 'POST',
@@ -127,7 +125,7 @@ export default function NavBar() {
       });
     }
 
-    // Limpar storage local
+    // Clean local storage
     await AsyncStorage.multiRemove([
       'authToken',
       'accessToken',
@@ -239,7 +237,7 @@ export default function NavBar() {
         anchorRef={marketButtonRef}
       />
 
-      {/* Profile Menu (abre para a esquerda) */}
+      {/* Profile Menu (opens to the left) */}
       <MenuModal
         visible={profileMenuVisible}
         onClose={() => setProfileMenuVisible(false)}

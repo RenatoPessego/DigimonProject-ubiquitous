@@ -7,51 +7,40 @@ import { API_URL } from '../config';
 
 export default function usePushNotifications() {
   useEffect(() => {
-    console.log('🚀 usePushNotifications hook iniciado');
     registerForPushNotificationsAsync();
   }, []);
 
   async function registerForPushNotificationsAsync() {
-    console.log('📲 A iniciar registo de notificações...');
 
     let token;
 
     if (!Device.isDevice) {
-      console.warn('⚠️ Notificações push requerem dispositivo físico');
+      console.warn('Push Notifications require physical device');
       return;
     }
 
     try {
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      console.log('🔒 Permissão atual:', existingStatus);
 
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
-        console.log('🔐 Permissão solicitada, novo status:', finalStatus);
       }
 
       if (finalStatus !== 'granted') {
-        console.warn('❌ Permissões negadas para notificações');
+        console.warn('Denied push notification permissions');
         return;
       }
 
       const tokenObj = await Notifications.getExpoPushTokenAsync();
       token = tokenObj.data;
-      console.log('📱 Token Expo obtido:', token);
-
-      if (!token) {
-        console.warn('❌ Token é undefined!');
-        return;
-      }
-
       const jwt = await AsyncStorage.getItem('authToken');
       console.log('🔑 Token JWT:', jwt);
 
       if (!jwt) {
-        console.warn('⚠️ authToken não encontrado — utilizador não autenticado?');
+        console.warn('⚠️ authToken not found — user not logged in?');
         return;
       }
 
@@ -67,12 +56,10 @@ export default function usePushNotifications() {
       const result = await res.json();
 
       if (!res.ok) {
-        console.warn('❌ Erro ao enviar push token:', result.message);
-      } else {
-        console.log('✅ Push token enviado com sucesso!');
+        console.warn('Error while sending push token:', result.message);
       }
     } catch (err) {
-      console.error('❌ Erro geral no registo de notificações:', err);
+      console.error('General error of notifications:', err);
     }
   }
 }

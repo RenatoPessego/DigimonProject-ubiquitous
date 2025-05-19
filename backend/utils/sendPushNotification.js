@@ -1,10 +1,7 @@
 const { Expo } = require('expo-server-sdk');
 const expo = new Expo();
 
-async function sendPushNotification(pushToken, title, body) {
-  console.log('📨 [Push] Tentando enviar notificação...');
-  console.log('🎯 Token recebido:', pushToken);
-
+async function sendPushNotification(pushToken, title, body) { // Send a push notification to the user
   if (!Expo.isExpoPushToken(pushToken)) {
     console.warn('❌ Token inválido:', pushToken);
     return;
@@ -21,7 +18,6 @@ async function sendPushNotification(pushToken, title, body) {
     console.log('📦 Conteúdo do push:', messages[0]);
 
     const receipt = await expo.sendPushNotificationsAsync(messages);
-    console.log('✅ Notificação enviada com sucesso:', receipt);
   } catch (err) {
     console.error('❌ Erro ao enviar notificação:', err);
   }

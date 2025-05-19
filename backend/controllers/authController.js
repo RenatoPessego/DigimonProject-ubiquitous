@@ -14,7 +14,7 @@ function checkPasswordRequirements(password) {
 }
 
 
-exports.register = async (req, res) => {
+exports.register = async (req, res) => {   // Register a new user
   const { name, username, email, password, confirmPassword, profileImage, birthDate } = req.body;
 
   if (!name || !username || !email || !password || !confirmPassword || !birthDate) {
@@ -71,7 +71,7 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+exports.login = async (req, res) => {  // Login user
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -96,7 +96,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.profile = async (req, res) => {
+exports.profile = async (req, res) => { // Get user profile
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json({ user });

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const sendPushNotification = require('../utils/sendPushNotification');
 
-// POST /messages → Enviar mensagem
+// Sending a message
 exports.sendMessage = async (req, res) => {
   try {
     const { listingId, receiverId, text } = req.body;
@@ -36,7 +36,7 @@ exports.sendMessage = async (req, res) => {
   }
 };
 
-// GET /messages/:listingId/:userId → Obter histórico entre dois utilizadores
+// Get messages between two users
 exports.getMessages = async (req, res) => {
   try {
     const listingId = req.params.listingId;
@@ -58,7 +58,7 @@ exports.getMessages = async (req, res) => {
   }
 };
 
-// GET /messages/participants/:listingId → lista de users únicos
+// Get all the users who chatted for a listing
 exports.getParticipants = async (req, res) => {
   try {
     const listingId = req.params.listingId;

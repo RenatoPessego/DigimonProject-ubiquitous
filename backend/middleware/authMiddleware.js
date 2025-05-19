@@ -1,4 +1,4 @@
-// backend/middleware/authMiddleware.js
+// Description: Controller for managing market listings, including selling, buying, and updating cards.
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'digimonSecretKey123';
 

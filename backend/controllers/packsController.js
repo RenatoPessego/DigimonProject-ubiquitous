@@ -40,7 +40,7 @@ function getRandomRarity(weights) {
   return 'Common';
 }
 
-// POST /packs/generate
+// Generating the packs
 exports.generatePacks = async (req, res) => {
   try {
     const { rarityType, cardCount, packSource } = req.body;
@@ -76,8 +76,7 @@ function CalculatePrice(profilePrice, count){
   return FinalPrice;
 }
 
-// POST /packs/open
-// POST /packs/open
+// Open a pack
 exports.openPack = async (req, res) => {
   try {
     const { rarity, cardCount, packSource } = req.body;
@@ -140,7 +139,7 @@ exports.openPack = async (req, res) => {
         pack: packSource
       });
 
-      // Verifica se a carta com mesmo ID, raridade e pack já existe
+      // Verifies if a card already exists in the user's collection
       const existing = user.cards.find(c =>
         c.id === chosen.id.toString() &&
         c.rarity === finalRarity &&

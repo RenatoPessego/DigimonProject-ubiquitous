@@ -1,4 +1,3 @@
-// models/MarketListing.js
 const mongoose = require('mongoose');
 
 const marketSchema = new mongoose.Schema({
