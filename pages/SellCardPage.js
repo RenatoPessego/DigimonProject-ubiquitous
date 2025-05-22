@@ -82,7 +82,12 @@ export default function SellCardPage() {
 
   const handleSell = async (card) => {
     const key = `${card.id}_${card.rarity}_${card.pack}`;
-    const price = priceMap[key];
+    let price = priceMap[key];
+
+    // Troca vírgula por ponto para aceitar formato brasileiro/europeu
+    if (typeof price === 'string') {
+      price = price.replace(',', '.');
+    }
 
     if (!price || isNaN(price) || Number(price) <= 0) {
       Alert.alert('Invalid Price', 'Please enter a valid price.');
