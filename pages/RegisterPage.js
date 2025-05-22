@@ -16,6 +16,8 @@ import { useNavigation } from '@react-navigation/native';
 import { getRegisterStyles } from '../styles/registerStyles';
 import { API_URL } from '../config';
 import { useTheme } from '../components/ThemeContext';
+import * as ImageManipulator from 'expo-image-manipulator';
+
 
 export default function RegisterPage() {
   const navigation = useNavigation();
@@ -36,6 +38,15 @@ export default function RegisterPage() {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  async function compressImage(uri) {
+    const result = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 800 } }],
+      { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+    );
+    return result.base64;
+  }
+
   const handlePickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permission.granted === false) {
@@ -48,11 +59,12 @@ export default function RegisterPage() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
-      base64: true,
+      base64: false,
     });
 
     if (!result.canceled) {
-      setForm({ ...form, profileImage: `data:image/jpeg;base64,${result.assets[0].base64}` });
+      const base64 = await compressImage(result.assets[0].uri);
+      setForm({ ...form, profileImage: `data:image/jpeg;base64,${base64}` });
     }
   };
 

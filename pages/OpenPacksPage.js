@@ -12,6 +12,7 @@ import {
   ScrollView,
   Modal,
   FlatList,
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
@@ -34,9 +35,16 @@ export default function OpenPacksPage() {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [modalVisible, setModalVisible] = useState(null);
 
-  const { width, height } = useWindowDimensions();
-  const isPortrait = height >= width;
   const { darkMode } = useTheme();
+  const [isPortrait, setIsPortrait] = useState(Dimensions.get('window').height >= Dimensions.get('window').width);
+
+  useEffect(() => {
+    const onChange = ({ window }) => {
+      setIsPortrait(window.height >= window.width);
+    };
+    const subscription = Dimensions.addEventListener('change', onChange);
+    return () => subscription?.remove?.();
+  }, []);
   const styles = getOpenPacksStyles(isPortrait, darkMode);
 
   const rarityOptions = ['common', 'rare', 'super_rare', 'legendary'];
