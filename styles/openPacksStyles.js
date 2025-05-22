@@ -1,9 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
 // Returns style object based on orientation and theme mode
-export const getOpenPacksStyles = (isPortrait, darkMode = false) => {
-  const { width, height } = Dimensions.get('window');
-
+export const getOpenPacksStyles = (isPortrait, darkMode = false, width = 400, height = 800) => {
   return StyleSheet.create({
     // Page container background
     container: {

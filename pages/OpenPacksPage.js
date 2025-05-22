@@ -36,16 +36,10 @@ export default function OpenPacksPage() {
   const [modalVisible, setModalVisible] = useState(null);
 
   const { darkMode } = useTheme();
-  const [isPortrait, setIsPortrait] = useState(Dimensions.get('window').height >= Dimensions.get('window').width);
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height >= width;
 
-  useEffect(() => {
-    const onChange = ({ window }) => {
-      setIsPortrait(window.height >= window.width);
-    };
-    const subscription = Dimensions.addEventListener('change', onChange);
-    return () => subscription?.remove?.();
-  }, []);
-  const styles = getOpenPacksStyles(isPortrait, darkMode);
+  const styles = getOpenPacksStyles(isPortrait, darkMode, width, height);
 
   const rarityOptions = ['common', 'rare', 'super_rare', 'legendary'];
   const cardCountOptions = [1, 3, 5, 7, 9];
@@ -169,47 +163,77 @@ export default function OpenPacksPage() {
     );
   };
 
-  const renderCustomDropdown = (label, options, selectedValue, onChange, type) => (
+  const renderCustomDropdown = (label, options, selectedValue, onChange, type) => {
+  const modalHeight = Math.min(300, height * 0.5); // limit modal height for scroll
+
+  return (
     <>
       <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
         onPress={() => setModalVisible(type)}
         style={styles.pickerContainer}
       >
-        <Text style={{ color: darkMode ? '#fff' : '#000', padding: 15, fontSize: 16 }}>{String(selectedValue).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Text>
+        <Text style={{ color: darkMode ? '#fff' : '#000', padding: 15, fontSize: 16 }}>
+          {String(selectedValue).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+        </Text>
       </TouchableOpacity>
-      <Modal visible={modalVisible === type} transparent animationType="fade">
-        <TouchableOpacity
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 30 }}
-          onPress={() => setModalVisible(null)}
-          activeOpacity={1}
+
+      {/* Modal rendered only if matching type is selected */}
+      {modalVisible === type && (
+        <Modal
+          transparent
+          visible
+          animationType="fade"
+          supportedOrientations={['portrait', 'landscape']}
+          onRequestClose={() => setModalVisible(null)}
         >
-          <View style={{ backgroundColor: darkMode ? '#222' : '#fff', borderRadius: 10, padding: 20 }}>
-            <FlatList
-              data={options}
-              keyExtractor={(item) => item.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => {
-                    onChange(item);
-                    setModalVisible(null);
-                  }}
-                  style={{ paddingVertical: 12 }}
-                >
-                
-              <Text style={{ fontSize: 16, color: darkMode ? '#fff' : '#000' }}>
-                {typeof item === 'string'
-                  ? item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-                  : item}
-              </Text>                
-              </TouchableOpacity>
-              )}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              justifyContent: 'center',
+              paddingHorizontal: 20,
+            }}
+            activeOpacity={1}
+            onPress={() => setModalVisible(null)}
+          >
+            <View
+              style={{
+                backgroundColor: darkMode ? '#222' : '#fff',
+                borderRadius: 12,
+                maxHeight: modalHeight,
+                paddingVertical: 10,
+              }}
+            >
+              <ScrollView
+                contentContainerStyle={{ paddingHorizontal: 20 }}
+                showsVerticalScrollIndicator={false}
+              >
+                {options.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => {
+                      onChange(item);
+                      setModalVisible(null);
+                    }}
+                    style={{ paddingVertical: 12 }}
+                  >
+                    <Text style={{ fontSize: 16, color: darkMode ? '#fff' : '#000' }}>
+                      {typeof item === 'string'
+                        ? item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                        : item}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      )}
     </>
   );
+};
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: darkMode ? '#111' : '#fff' }}>
