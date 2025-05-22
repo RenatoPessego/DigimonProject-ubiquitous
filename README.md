@@ -8,6 +8,11 @@ A modern mobile app built with **React Native** and **Expo**, themed around the 
 - React Native interface with modular styling
 - Custom styles using StyleSheet
 - Support for navigation between screens
+- Light/Dark Mode
+- Unit Testing
+- Location services
+- API Integration
+- Push Notifications
 
 ## Installation
 ```bash
