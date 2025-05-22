@@ -27,6 +27,13 @@ jest.mock('expo-image-picker', () => ({
   }
 }));
 
+jest.mock('expo-image-manipulator', () => ({
+  manipulateAsync: jest.fn((uri, actions, options) =>
+    Promise.resolve({ uri: 'mocked-uri', base64: 'mocked-base64' })
+  ),
+  SaveFormat: { JPEG: 'jpeg' }
+}));
+
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
 }));
@@ -82,30 +89,28 @@ describe('RegisterPage', () => {
   });
 
   test('submits valid form and does not trigger age error', async () => {
-  const { getByPlaceholderText, getByText, getByTestId, toJSON } = renderWithTheme();
+    const { getByPlaceholderText, getByText, getByTestId, toJSON } = renderWithTheme();
 
-  fireEvent.changeText(getByPlaceholderText('Name'), 'Test User');
-  fireEvent.changeText(getByPlaceholderText('Username'), 'testuser');
-  fireEvent.changeText(getByPlaceholderText('Email'), 'test@example.com');
-  fireEvent.changeText(getByPlaceholderText('Password'), 'SecurePass123!');
-  fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'SecurePass123!');
-
+    fireEvent.changeText(getByPlaceholderText('Name'), 'Test User');
+    fireEvent.changeText(getByPlaceholderText('Username'), 'testuser');
+    fireEvent.changeText(getByPlaceholderText('Email'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'SecurePass123!');
+    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'SecurePass123!');
 
     // Mock of method `toISOString()` to force a specific value
     fireEvent.press(getByText(/Birth Date:/i));
 
-const picker = await waitFor(() => getByTestId('birthDatePicker'));
-fireEvent(picker, 'onChange', { type: 'set', nativeEvent: { timestamp: new Date('2004-02-27').getTime() } }, new Date('2004-02-27'));
+    const picker = await waitFor(() => getByTestId('birthDatePicker'));
+    fireEvent(picker, 'onChange', { type: 'set', nativeEvent: { timestamp: new Date('2004-02-27').getTime() } }, new Date('2004-02-27'));
 
-console.log(toJSON());
-  // Submits
-console.log(getByTestId('TextBirth').props.children);
+    console.log(toJSON());
+    // Submits
+    console.log(getByTestId('TextBirth').props.children);
 
-  fireEvent.press(getByText('Register'));
+    fireEvent.press(getByText('Register'));
 
-  
-  await waitFor(() => {
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith('authToken', 'mocked-token');
+    await waitFor(() => {
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('authToken', 'mocked-token');
+    });
   });
 });
-})
