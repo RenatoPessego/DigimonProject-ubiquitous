@@ -21,10 +21,7 @@ const PORT = 5000;
 
 if (process.env.NODE_ENV !== 'test') {
   // MongoDB Atlas
-  mongoose.connect('mongodb+srv://Ubiquitous:8gl4dWSOoskdAl8o@cluster0.cixc7gb.mongodb.net/Ubiquos', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  mongoose.connect('mongodb+srv://Ubiquitous:8gl4dWSOoskdAl8o@cluster0.cixc7gb.mongodb.net/Ubiquos')
   .then(() => console.log('MongoDB Atlas connected'))
   .catch((err) => console.error('MongoDB error:', err));
 }
