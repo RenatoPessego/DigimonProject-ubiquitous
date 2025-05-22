@@ -1,132 +1,85 @@
-import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import OpenPacksPage from '../path/to/OpenPacksPage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '../config';
+jest.setTimeout(20000);
 
-// Mock dependencies
-jest.mock('@react-native-async-storage/async-storage');
-jest.mock('../components/ThemeContext', () => ({
-  useTheme: () => ({
-    darkMode: false,
-  }),
-}));
-jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: ({ children }) => <>{children}</>,
-}));
-jest.mock('react-native-animatable', () => ({
-  View: ({ children }) => <>{children}</>,
-  Image: ({ source }) => <>{source}</>,
-}));
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const jwt = require('jsonwebtoken');
+const app = require('../server');
+const User = require('../models/User');
 
-// Mock API responses
-const mockSetList = ['Set 1', 'Set 2', 'Set 3'];
-const mockPack = {
-  name: 'Test Pack',
-  price: 100,
-  rarity: 'common',
-  cardCount: 3,
-  packSource: 'Set 1'
-};
-const mockCards = [
-  { id: 1, name: 'Card 1', rarity: 'common', image_url: 'http://test.com/card1.jpg' },
-  { id: 2, name: 'Card 2', rarity: 'rare', image_url: 'http://test.com/card2.jpg' }
-];
+const JWT_SECRET = 'digimonSecretKey123';
 
-describe('OpenPacksPage', () => {
-  beforeEach(() => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve(mockSetList.map(set => ({ set_name: set }))),
-        ok: true,
-      })
-    );
-    AsyncStorage.getItem.mockResolvedValue('test-token');
+let mongoServer;
+let server;
+let token;
+let userId;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri);
+
+  const user = new User({
+    username: 'testuser',
+    password: 'fakehash',
+    cards: [],
+    balance: 10
+  });
+  await user.save();
+  userId = user._id;
+  token = jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '1h' });
+
+  server = app.listen(4004); // porta isolada para este teste
+});
+
+afterAll(async () => {
+  if (mongoose.connection.db) {
+    await mongoose.connection.dropDatabase();
+  }
+  await mongoose.disconnect();
+  await mongoServer.stop();
+  server.close();
+});
+
+describe('Open Pack Flow (Backend)', () => {
+  const rarity = 'common';
+  const cardCount = 3;
+  const packSource = 'Phantom Nightmare'; // nome válido da API
+
+  it('should generate a pack', async () => {
+    const res = await request(server)
+      .post('/packs/generate')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rarityType: rarity, cardCount, packSource });
+
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body.packs)).toBe(true);
+    expect(res.body.packs[0]).toHaveProperty('name');
+    expect(res.body.packs[0]).toHaveProperty('price');
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  it('should open a pack and return cards', async () => {
+    const res = await request(server)
+      .post('/packs/open')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rarity, cardCount, packSource });
+
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body.cards)).toBe(true);
+    expect(res.body.cards.length).toBe(cardCount);
+    expect(res.body.cards[0]).toHaveProperty('name');
+    expect(res.body.cards[0]).toHaveProperty('rarity');
   });
 
-  it('renders correctly', async () => {
-    const { getByText } = render(<OpenPacksPage />);
-    
-    await waitFor(() => {
-      expect(getByText('🧪 Select Pack Filters')).toBeTruthy();
-      expect(getByText('Common')).toBeTruthy();
-      expect(getByText('1')).toBeTruthy();
-    });
-  });
+  it('should fail to open a pack with insufficient funds', async () => {
+    await User.findByIdAndUpdate(userId, { balance: 0 });
 
-  it('generates and opens a pack successfully', async () => {
-    fetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ packs: [mockPack] }),
-        ok: true,
-      })
-    ).mockImplementationOnce(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ cards: mockCards }),
-        ok: true,
-      })
-    );
+    const res = await request(server)
+      .post('/packs/open')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rarity: 'legendary', cardCount: 5, packSource });
 
-    const { getByText } = render(<OpenPacksPage />);
-    
-    // Generate pack
-    await act(async () => {
-      fireEvent.press(getByText('Generate'));
-    });
-
-    await waitFor(() => {
-      expect(getByText('Test Pack')).toBeTruthy();
-    });
-
-    // Open pack
-    await act(async () => {
-      fireEvent.press(getByText('Open'));
-    });
-
-    await waitFor(() => {
-      expect(getByText('✨ You got:')).toBeTruthy();
-      expect(getByText('Card 1')).toBeTruthy();
-    });
-  });
-
-  it('handles pack generation error', async () => {
-    fetch.mockImplementationOnce(() =>
-      Promise.reject(new Error('Network error'))
-    );
-
-    const { getByText } = render(<OpenPacksPage />);
-    
-    await act(async () => {
-      fireEvent.press(getByText('Generate'));
-    });
-
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalled();
-    });
-  });
-
-  it('changes pack filters', async () => {
-    const { getByText } = render(<OpenPacksPage />);
-    
-    // Change rarity
-    await act(async () => {
-      fireEvent.press(getByText('Common'));
-      fireEvent.press(getByText('Rare'));
-    });
-
-    // Change card count
-    await act(async () => {
-      fireEvent.press(getByText('1'));
-      fireEvent.press(getByText('3'));
-    });
-
-    await waitFor(() => {
-      expect(getByText('Rare')).toBeTruthy();
-      expect(getByText('3')).toBeTruthy();
-    });
+    expect(res.statusCode).toBe(402);
+    expect(res.body.message).toMatch(/Insufficient balance/i);
   });
 });
