@@ -1,6 +1,6 @@
 # DigimonProject - Ubiquitous
 
-A modern mobile app built with **React Native** and **Expo**, themed around the world of Digimon. This project is part of the subject Ubiquitous applications
+A modern mobile app built with **React Native** and **Expo**, themed around the world of Yu-Gi-Oh. This project is part of the subject Ubiquitous applications
 
 ## Features
 
@@ -20,3 +20,13 @@ Open a new terminal and do:
 ```bash
 cd ./backend
 node server.js
+
+For the unit testing:
+Frontend:
+```bash
+npm test -- --testPathIgnorePatterns=backend
+
+Backend:
+```bash
+cd ./backend
+npm test
