@@ -103,6 +103,7 @@ export default function SellCardPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          name: card.name,
           cardId: card.id,
           rarity: card.rarity,
           pack: card.pack,

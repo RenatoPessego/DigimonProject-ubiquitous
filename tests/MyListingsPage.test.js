@@ -23,7 +23,7 @@ global.fetch = jest.fn();
 const mockListings = [
   {
     _id: '1',
-    name: 'abc',
+    cardId: '123',
     rarity: 'Ultra Rare',
     pack: 'Legends Pack',
     price: 10,
@@ -60,7 +60,7 @@ describe('MyListingsPage', () => {
     const { findByText, getByText } = renderWithTheme();
 
     // Wait for data to load
-    expect(await findByText('Card: abc')).toBeTruthy();
+    expect(await findByText('Card Id: 123')).toBeTruthy();
 
     // Press buttons
     fireEvent.press(getByText('Edit'));
