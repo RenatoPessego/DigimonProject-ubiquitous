@@ -3,7 +3,7 @@ const expo = new Expo();
 
 async function sendPushNotification(pushToken, title, body) { // Send a push notification to the user
   if (!Expo.isExpoPushToken(pushToken)) {
-    console.warn('❌ Token inválido:', pushToken);
+    console.warn('Invalid token:', pushToken);
     return;
   }
 
@@ -15,11 +15,9 @@ async function sendPushNotification(pushToken, title, body) { // Send a push not
       body,
     }];
 
-    console.log('📦 Conteúdo do push:', messages[0]);
-
     const receipt = await expo.sendPushNotificationsAsync(messages);
   } catch (err) {
-    console.error('❌ Erro ao enviar notificação:', err);
+    console.error('Error sending notification:', err);
   }
 }
 

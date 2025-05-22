@@ -91,14 +91,14 @@ describe('RegisterPage', () => {
   fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'SecurePass123!');
 
 
-    // Mock do método `toISOString()` do prototype para forçar valor
+    // Mock of method `toISOString()` to force a specific value
     fireEvent.press(getByText(/Birth Date:/i));
 
 const picker = await waitFor(() => getByTestId('birthDatePicker'));
 fireEvent(picker, 'onChange', { type: 'set', nativeEvent: { timestamp: new Date('2004-02-27').getTime() } }, new Date('2004-02-27'));
 
 console.log(toJSON());
-  // Submete
+  // Submits
 console.log(getByTestId('TextBirth').props.children);
 
   fireEvent.press(getByText('Register'));

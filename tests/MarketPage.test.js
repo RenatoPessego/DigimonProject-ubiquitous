@@ -18,7 +18,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 //  Mock NavBar to avoid external fetches
 jest.mock('../components/NavBar', () => () => <></>);
 
-// 🔄 Enable fetch mocking
+// Enable fetch mocking
 beforeAll(() => {
   global.fetch = fetchMock;
 });
@@ -27,7 +27,7 @@ afterEach(() => {
   fetchMock.resetMocks();
 });
 
-//  Dados simulados para o teste
+//  Simulated data for testing
 const mockListings = [
   {
     _id: '1',
@@ -56,11 +56,11 @@ describe('MarketPage', () => {
 
     const { findByText, getByText } = renderWithTheme();
 
-    // Verifica se os dados renderizaram corretamente
+    // Check if data is being fetched
     expect(await findByText('Card: abc')).toBeTruthy();
     expect(getByText('Seller: CardSeller')).toBeTruthy();
 
-    // Mock da chamada POST para "Buy"
+    // Mock POST response
     fetchMock.mockResponseOnce(JSON.stringify({ success: true }));
 
     fireEvent.press(getByText('Buy'));

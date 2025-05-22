@@ -5,20 +5,20 @@ import { ThemeProvider } from '../components/ThemeContext';
 import fetchMock from 'jest-fetch-mock';
 import { Alert } from 'react-native';
 
-// 🛑 Mock Alert.alert para evitar erros
+// Mock Alert.alert to avoid showing alerts during tests
 jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
-// 📦 Mock usePushNotifications
+// Mock usePushNotifications
 jest.mock('../components/usePushNotifications', () => () => {});
 
-// 🔁 Mock navegação
+// Mock navegation
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
     navigate: jest.fn(),
   }),
 }));
 
-// 🔐 Mock AsyncStorage
+// Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn((key) => {
     if (key === 'authToken') return Promise.resolve('mock-token');
@@ -26,7 +26,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   }),
 }));
 
-// Configuração do fetch
+// Fetch configuration
 beforeAll(() => {
   fetchMock.enableMocks();
 });
@@ -44,14 +44,14 @@ const renderWithTheme = () =>
 
 describe('HomePage', () => {
   it('shows loading initially', async () => {
-    fetchMock.mockResponseOnce(() => new Promise(() => {})); // bloqueia fetch para simular loading
+    fetchMock.mockResponseOnce(() => new Promise(() => {})); // blocks fetch to simulate loading
     const { getByTestId } = renderWithTheme();
     expect(getByTestId('ActivityIndicator')).toBeTruthy();
   });
 
   it('shows "not logged in" if no token found', async () => {
     const AsyncStorage = require('@react-native-async-storage/async-storage');
-    AsyncStorage.getItem.mockResolvedValueOnce(null); // sem token
+    AsyncStorage.getItem.mockResolvedValueOnce(null); // no token
 
     const { findByText } = renderWithTheme();
     expect(await findByText('You are not logged in.')).toBeTruthy();
