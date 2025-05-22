@@ -43,6 +43,7 @@
     "babel-jest": "^29.7.0",
     "jest-expo": "^53.0.5",
     "jest-fetch-mock": "^3.0.3"
+    
   },
   "jest": {
     "preset": "jest-expo",
@@ -50,7 +51,7 @@
       "<rootDir>/jestSetup.js"
     ],
     "transformIgnorePatterns": [
-      "node_modules/(?!(react-native|@react-native|expo|expo-asset|expo-font|expo-constants|expo-modules-core|@expo|@expo/vector-icons|@expo-google-fonts|@react-navigation|native-base|unimodules|@unimodules|sentry-expo|@react-native-community/datetimepicker)/)"
+      "node_modules/(?!(react-native|@react-native|expo|expo-asset|expo-font|react-native-animatable|expo-constants|expo-modules-core|@expo|@expo/vector-icons|@expo-google-fonts|@react-navigation|native-base|unimodules|@unimodules|sentry-expo|@react-native-community/datetimepicker)/)"
     ]
   },
   "private": true

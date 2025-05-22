@@ -31,7 +31,7 @@ afterEach(() => {
 const mockListings = [
   {
     _id: '1',
-    cardId: '123456',
+    name: 'abc',
     rarity: 'Ultra Rare',
     pack: 'Starter Pack',
     price: 100,
@@ -57,7 +57,7 @@ describe('MarketPage', () => {
     const { findByText, getByText } = renderWithTheme();
 
     // Verifica se os dados renderizaram corretamente
-    expect(await findByText('Card ID: 123456')).toBeTruthy();
+    expect(await findByText('Card: abc')).toBeTruthy();
     expect(getByText('Seller: CardSeller')).toBeTruthy();
 
     // Mock da chamada POST para "Buy"

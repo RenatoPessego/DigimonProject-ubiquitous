@@ -16,6 +16,8 @@ jest.mock('expo-image-picker', () => ({
   }),
   MediaTypeOptions: { Images: 'Images' },
 }));
+jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
+
 
 jest.mock('@react-navigation/native', () => {
   const actualNav = jest.requireActual('@react-navigation/native');
